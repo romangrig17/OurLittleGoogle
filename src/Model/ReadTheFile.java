@@ -14,7 +14,7 @@ public class ReadTheFile implements ReadFile,Runnable{
     private ArrayList<String> allTextFile;
     private String path;
     private int counter = 0;
-    Mutex mutex;
+    private Mutex mutex;
 
     @Override
     public void run() {
@@ -54,7 +54,7 @@ public class ReadTheFile implements ReadFile,Runnable{
                         StringBuilder onlyText = new StringBuilder();
                         while(!((st = br.readLine()).contains("</TEXT>")))
                         {
-                            onlyText.append(st + "\n");
+                            onlyText.append(st).append("\n");
                         }
                         Parser parser = new Parser();
                         onlyText = parser.Parser(onlyText);
@@ -107,7 +107,7 @@ public class ReadTheFile implements ReadFile,Runnable{
         }
     }
 
-    public int getNumOfDirs() {
+    private int getNumOfDirs() {
         if (allTextFile != null)
         {
             return allTextFile.size();
