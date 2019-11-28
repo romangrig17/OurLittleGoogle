@@ -1,7 +1,5 @@
 package Model;
 
-import sun.awt.Mutex;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
@@ -14,7 +12,9 @@ public class ReadTheFile implements ReadFile,Runnable{
     private ArrayList<String> allTextFile;
     private String path;
     private int counter = 0;
-    private Mutex mutex;
+    private String[] names;
+    //private Mutex mutex;
+    //protected Semaphore;
 
     @Override
     public void run() {
@@ -28,57 +28,53 @@ public class ReadTheFile implements ReadFile,Runnable{
     @Override
     public void startToRead() {
 
+
         int numOfDirs  = getNumOfDirs();
         while (numOfDirs != counter){
-
             //every thread gets his file
-            mutex.lock();
+            //mutex.lock();
             String rememberPath = allTextFile.get(counter);
             File file = new File(rememberPath);
             counter++;
-            mutex.unlock();
+            //mutex.unlock();
 
             //need to check if there is a problem with thread
             //I checked and everything looked fine!
             try {
-                System.out.println(Thread.currentThread().getId());
-
                 BufferedReader br = new BufferedReader(new FileReader(file));
                 String st;
                 int counterOfDocInOneText = 1;
-                while ((st = br.readLine()) != null)
-                {
-                    // make a String with only String
-                    if (st.contains("<TEXT>"))
-                    {
-                        StringBuilder onlyText = new StringBuilder();
-                        while(!((st = br.readLine()).contains("</TEXT>")))
-                        {
-                            onlyText.append(st).append("\n");
+                // make a String with only String
+                while ((st = br.readLine()) != null) {
+                    if (st.contains("<TEXT>")) {
+                        String onlyText = "";
+                        while (!((st = br.readLine()).contains("</TEXT>"))) {
+                            onlyText = onlyText + st;
                         }
+
                         Parser parser = new Parser();
-                        onlyText = parser.Parser(onlyText);
-                        writheFile(onlyText ,rememberPath + "_" + counterOfDocInOneText);
-                        counterOfDocInOneText++;
+                        parser.Parser(onlyText,names[counter],counterOfDocInOneText);
+                        //writheFile(onlyText, rememberPath + "_" + counterOfDocInOneText++);
                     }
                 }
             }
             catch (Exception e) {
-                System.out.println("problem with the reading from file!!");
+                System.out.println("problem with the reading from file!! in: " + rememberPath);
             }
+
         }
     }
 
     @Override
     public void writheFile(StringBuilder document,String path) {
-        mutex.lock();
+        //mutex.lock();
         try (PrintWriter out = new PrintWriter(path + ".txt")) {
             out.println(document);
-            mutex.unlock();
+            //mutex.unlock();
         }
         catch (Exception e)
         {
-            mutex.unlock();
+            //mutex.unlock();
             System.out.println("Problem With the writhing");
         }
     }
@@ -91,18 +87,27 @@ public class ReadTheFile implements ReadFile,Runnable{
     @Override
     public void getListOfDirs(String path) {
         //Booting all parameters
-        mutex = new Mutex();
+
+        //mutex = new Mutex();
         this.path = path;
         this.allTextFile = new ArrayList<>();
         //brings all the paths of dirs that exist in our path
-        File file = new File(path);
-        String[] names = file.list();
+        File files = new File(path);
+        files.listFiles();
+        names = files.list();
+
 
         for(String name : names)
         {
-            if (new File(path +"\\" + name).isDirectory())
+            String pathWithName = path +"\\" + name;
+            if (new File(pathWithName).isDirectory())
             {
-                allTextFile.add(path + "\\" + name + "\\" + name);
+                File docs = new File(pathWithName);
+                String[] allDocsInDir = docs.list();
+                for (int i=0; i<allDocsInDir.length ; i++)
+                {
+                    allTextFile.add(pathWithName + "\\" + allDocsInDir[i]);
+                }
             }
         }
     }
