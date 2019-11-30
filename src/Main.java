@@ -1,4 +1,4 @@
-import Model.ReadTheFile;
+import Model.FilesReader;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -13,18 +13,20 @@ public class Main {
         long start = System.currentTimeMillis();
 
         ExecutorService executorService = Executors.newFixedThreadPool(1);
-        Runnable test = new ReadTheFile();
-        ((ReadTheFile) test).getListOfDirs("C:\\Users\\roman\\OneDrive\\שולחן העבודה\\My Little Project\\corpus\\corpus");
-        for(int i =0; i<10 ; i++)
+        Runnable test = new FilesReader("C:\\Users\\user1\\Desktop\\masters\\�����\\information_retrieval\\corpus\\corpus_test");
+        
+        //((FilesReader) test).GetListOfDirs();
+        
+        for(int i=0; i<1 ; i++)
         {
             executorService.execute(test);
         }
+        
         executorService.shutdown();
 
         while (!executorService.isTerminated()){}
+        
         long elapsedTime = System.currentTimeMillis() - start;
         System.out.println("The time of program: " + elapsedTime);
-
-
     }
 }

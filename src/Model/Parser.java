@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 
-public class Parser implements Parse{
+public class Parser implements IParser{
 
-    public ArrayList<Pair<String,String>> Parser(String doc_Text, String doc_Name,int doc_Number)
+    public ArrayList<Pair<String,String>> Parser(String doc_Text, String doc_Name, int doc_Number)
     {
         //first string is the name, second string is the name of doc.
         ArrayList<Pair<String,String>> listOfAllTerms = new ArrayList();
@@ -18,9 +18,11 @@ public class Parser implements Parse{
         //first we need to split and find the text between ""
         String[] allWords = doc_Text.split(" ");
         int allWordsLength = allWords.length;
+        
         for(int i = 0; i<allWordsLength; i++)
         {
-            String word = allWords[i];
+            String word = allWords[i].trim();
+            
             //if the word is empty
             if(word.isEmpty())
             {
@@ -33,8 +35,15 @@ public class Parser implements Parse{
              */
             else if(Pattern.matches("^[0-9]+\\.?[0-9]*",word))
             {
+            	//try()
+            	//{
                 numberParsser(word);
                 //System.out.println(word);
+            	/*}
+            	catch()
+            	{
+            		
+            	}*/
             }
             String theWordBefore = word;
         }
