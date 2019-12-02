@@ -33,7 +33,7 @@ public class Parser implements IParser{
         int allWordsLength = allWords.length;
         String theWordBefore="";
         String word;
-        boolean end_with_dot=false;  
+        boolean end_with_dot_or_comma=false;  
         
         for(int i = 0; i<allWordsLength; i++)
         {
@@ -41,7 +41,7 @@ public class Parser implements IParser{
             if (word.isEmpty())
             	continue;
             
-            if(end_with_dot= word.endsWith("."))
+            if(end_with_dot_or_comma= (word.endsWith(".") || word.endsWith(",")))
             {
             	word = word.substring(0,word.length()-1);
             }
@@ -58,7 +58,7 @@ public class Parser implements IParser{
             	}
                 else //number
                 {
-                	if( (!end_with_dot) && ((i+1)<allWordsLength) )
+                	if( (!end_with_dot_or_comma) && ((i+1)<allWordsLength) )
                 	{//look if word after is "percentage" or "percent" or "%" / "Dollars" or "$" /  
                 		//if allWords[i+1]=="percentage"/"percent"/"%", save as number%
                 		//if allWords[i+1]=="Dollars" or "$"or "million/billion/trillion/m/bn/"
@@ -87,6 +87,10 @@ public class Parser implements IParser{
             {
             	System.out.println("words: " +word);	
             }
+            else
+            {
+            	System.out.println("Didnt match : " +word);	
+            }
             
             theWordBefore = word;
         }
@@ -98,11 +102,12 @@ public class Parser implements IParser{
     private types checkNumSize(String number)
     {
     	types ret=types.UNDEFINED;
-    	long num; 
+    	float num; 
     	
     	 try
     	 {
-    		 num=Long.parseLong(number);
+    		num=Float.parseFloat(number);
+    		 
      		if(num<1000) 
      		{
      	    	ret=types.NUMBER_SMALLER_THAN_1K;
