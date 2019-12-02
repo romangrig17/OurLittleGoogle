@@ -79,7 +79,7 @@ public class Parser implements IParser{
             {
             	System.out.println("fraction with / : " +word);		
             }
-            else if(Pattern.matches("^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\\s\\./0-9]*$",word))//phone number
+            else if(Pattern.matches("^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\\s\\./0-9]*$",word))//phone number- TODO- check term i+1 for cases like (703) 44324 -  
             {
             	System.out.println("Phone number: " +word);
             }
