@@ -39,8 +39,8 @@ public class Parser implements IParser{
 	Pattern patternMonthYear = Pattern.compile("(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)[ ][1-2]{1}[0-9]{1}[0-9]{1}[0-9]{1}");//Month year
 
 	//Price
-	Pattern patternDollarSignBillion = Pattern.compile("[$](\\d{1,3},\\d{3}(,\\d{3})*)(\\.\\d*)[ ](billion)?|[$]\\d+\\.?\\d*[ ](billion)");//$price billion
-	Pattern patternDollarSignMillion = Pattern.compile("[$](\\d{1,3},\\d{3}(,\\d{3})*)(\\.\\d*)[ ](million)?|[$]\\d+\\.?\\d*[ ](million)");//$price million
+	Pattern patternDollarSignBillion = Pattern.compile("[$](\\d{1,3},\\d{3}(,\\d{3})*)(\\.\\d*)?[ ](billion)|[$]\\d+\\.?\\d*[ ](billion)");//$price billion
+	Pattern patternDollarSignMillion = Pattern.compile("[$](\\d{1,3},\\d{3}(,\\d{3})*)(\\.\\d*)?[ ](million)|[$]\\d+\\.?\\d*[ ](million)");//$price million
 	Pattern patternDollarSign = Pattern.compile("[$](\\d{1,3},\\d{3}(,\\d{3})*)(\\.\\d*)?|[$]\\d+\\.?\\d*");//$price
 	Pattern patternFractionDollar = Pattern.compile("(\\d{1,3},\\d{3}(,\\d{3})*)(\\.\\d*)?[ ](\\d{1,}+\\/+\\d{1,})[ ](Dollars)|\\d+\\.?\\d*[ ](\\d{1,}+\\/+\\d{1,})[ ](Dollars)");//Price Dollars
 	Pattern patternDollar = Pattern.compile("(\\d{1,3},\\d{3}(,\\d{3})*)(\\.\\d*)?[ ](Dollars)|\\d+\\.?\\d*[ ](Dollars)"); //Price Dollars
@@ -82,8 +82,29 @@ public class Parser implements IParser{
 
 		printHash(termsHash);
 
-
-		System.out.println(sb2);
+		String[] allWords = sb2.toString().split(" ");
+	    int allWordsLength = allWords.length;
+        
+	    for(int i = 0; i<allWordsLength; i++)
+        {
+	    	
+	    	if(allWords[i].matches("[A-z]{1,}"))
+	    	{
+	    		System.out.println("adding leftovers: "+allWords[i]);
+	    		addToHash(termsHash,allWords[i]);
+	    	}
+	    	else if(allWords[i].matches("[A-z]{1,}(:|.|,|\\|//)"))
+	    	{
+	    		System.out.println("adding leftovers -1: "+allWords[i]);
+	    		addToHash(termsHash,allWords[i].substring(0, allWords[i].length()-1));
+	    	}
+	    	else
+	    	{
+	    		System.out.println("not adding: "+allWords[i]);
+	    	}
+        }
+		
+		//System.out.println(sb2);
 		return termsHash;
 	}
 
