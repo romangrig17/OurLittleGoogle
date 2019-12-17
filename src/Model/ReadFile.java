@@ -2,24 +2,24 @@ package Model;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.io.File;
+import java.util.HashMap;
 
 
-public class FilesReader implements IFilesReader,Runnable{
+public class ReadFile implements IReadFile {
 
     private String rootPath;
-    private String[] directories;
+    public String[] directories;
+    ArrayList<String> allFiles;
 
-    public FilesReader(String path)
+
+
+    public ReadFile(String path)
     {
     	rootPath = path;
-    	SetListOfDirs(path);
-    }
-    
-    @Override
-    public void run() {
+    	getListOfDirs(path);
+        allFiles = new ArrayList<>();
         ReadAll();
     }
 
@@ -37,13 +37,15 @@ public class FilesReader implements IFilesReader,Runnable{
             {
             	continue;
             }
-            
             ReadFromDirectory(currentDirectory);
-            
-            dirCounter++;
         }
+        System.out.println("im here");
     }
-    
+
+    /**
+     * Getting all files from a dir
+     * @param directory - the dir where is the files
+     */
     private void ReadFromDirectory(File directory) {
         String dirName = directory.getPath();
         String[] docsInDir = directory.list();
@@ -51,30 +53,36 @@ public class FilesReader implements IFilesReader,Runnable{
         for (int i=0; i<docsInDir.length ; i++)
         {
         	File file = new File(dirName + "\\" + docsInDir[i]);
-        	ReadFile(file);
+        	allFiles.add(dirName + "\\" + docsInDir[i]);
         }
     }
 
-	private void ReadFile(File file) {
-		
-		 Parser parser = new Parser();
+    /**
+     * get the whole file and return the Texts from the file with DOC ID
+     * @param file - getting the whole file/
+     */
+	public HashMap<String,StringBuilder> getTextsFromTheFile(File file) {
+		HashMap<String,StringBuilder> allDocsInTheFile = new HashMap<>();
+		// Parser parser = new Parser();
 		try {
 		    BufferedReader br = new BufferedReader(new FileReader(file));
 		    String st;
-		    int counterOfDocIncurrentFile = 1;
-		    // make a String with only String
-      
+            String docName = "";
 		    while ((st = br.readLine()) != null) {
-		        if (st.contains("<TEXT>")) {
+                //gets the name of the text
+
+                if (st.contains("<DOCNO>"))
+                {
+                    String[] line = st.split(" ");
+                    docName = line[1];
+                }
+		        else if (st.contains("<TEXT>")) {
 		            StringBuilder onlyText = new StringBuilder();
 		            
 		            while (!((st = br.readLine()).contains("</TEXT>"))) {
 		                onlyText.append(st);
 		            }
-
-		          
-		            parser.Parser(onlyText.toString(), file.getPath(), counterOfDocIncurrentFile++);
-		            //WriteToFile(onlyText, rememberPath + "_" + counterOfDocInOneText++);
+		            allDocsInTheFile.put(docName,onlyText);
 		        }
 		    }
 		    br.close();
@@ -82,39 +90,34 @@ public class FilesReader implements IFilesReader,Runnable{
 		catch (Exception e) {
 		    System.out.println("problem with the reading from file!! in: " + file.getPath());
 		}
+		return allDocsInTheFile;
 	}
 
-    @Override
-    public void WriteToFile(StringBuilder document,String path) {
-        //mutex.lock();
-        try (PrintWriter out = new PrintWriter(path + ".txt")) {
-            out.println(document);
-            //mutex.unlock();
-        }
-        catch (Exception e)
-        {
-            //mutex.unlock();
-            System.out.println("Problem with the writing");
-        }
-    }
 
+
+
+    //<editor-fold des="Getters">
     /**
-     * Booting all parameters.
      * Fills the list of all Text files
      * @param path -  to folder where all docs is existing
      */
-	private void SetListOfDirs(String path) {
+    private String[] getListOfDirs(String path) {
         File files = new File(path);
         String[] names = files.list();
         directories = new String[names.length];
 
         for(int i=0; i<names.length; i++)
         {
-        	directories[i] = path + "\\" + names[i];
+            directories[i] = path + "\\" + names[i];
         }
+        return directories;
     }
 
-    private int GetNumOfDirs() {
+    /**
+     *
+     * @return - number of dirs in the path
+     */
+    public int GetNumOfDirs() {
         if (directories != null)
         {
             return directories.length;
@@ -124,4 +127,18 @@ public class FilesReader implements IFilesReader,Runnable{
             return 0;
         }
     }
+
+    /**
+     *
+     * @return - all the files that we have in the corpus.
+     */
+    public ArrayList<String> getAllFiles()
+    {
+        return allFiles;
+    }
+    //</editor-fold>
+
+
+
+
 }

@@ -1,11 +1,12 @@
 package Model;
 
-import javafx.util.Pair;
+
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public interface IParser {
 
-    ArrayList<Pair<String,String>> Parser(String doc_Text, String doc_Name,int doc_Number);
+    HashMap<String,Integer> parseDoc(String doc_Text, String doc_Number);
 
 }
