@@ -14,7 +14,7 @@ public class Main {
         //GUI gui = new GUI();
 
         boolean stemming = false;
-        Manager manager = new Manager("C:\\My Little Project\\corpus\\corpus","C:\\My Little Project\\PostingFile",stemming);
+        Manager manager = new Manager("C:\\Users\\user1\\Desktop\\masters\\השלמה\\information_retrieval\\corpus\\corpus_test","C:\\Users\\user1\\Desktop\\masters\\השלמה\\information_retrieval\\corpus\\corpus_write",stemming);
 
 
         //<editor-fold des="old start">
