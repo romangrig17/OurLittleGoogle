@@ -10,6 +10,8 @@ import java.util.concurrent.Executors;
 
 public class Manager {
 
+
+
     ReadFile fileReader;
     Indexer indexer;
 
@@ -17,6 +19,8 @@ public class Manager {
     ArrayList<String> allFiles;
     StringBuilder sortedDictionary;
     StringBuilder docsInfo;
+
+    private static final int AMOUNT_OF_DOCS_IN_POSTING_FILE = 7000;
 
     public Manager()
     {
@@ -29,11 +33,16 @@ public class Manager {
          * "C:\\My Little Project\\corpus\\corpus"
          * "C:\\My Little Project\\PostingFile"
          */
+        int counterOfDocs =0;
         docsInfo = new StringBuilder();
         fileReader = new ReadFile(pathForCorpus);
         allFiles = fileReader.getAllFiles();
         indexer = new Indexer();
         WritePostingFile writePostingFile = new WritePostingFile(new StringBuilder(pathForPostingFile));
+        /**
+         * TODO:Get path for Stop Words
+         */
+        StopWords stopWords = new StopWords("C:\\Users\\grigorer\\Desktop\\Project\\Stop Words.txt");
         for (String file:allFiles)
         {
             HashMap<String,StringBuilder> allTextsFromTheFile = fileReader.getTextsFromTheFile(new File(file));
@@ -41,41 +50,54 @@ public class Manager {
             Iterator it = allTextsFromTheFile.keySet().iterator();
             for (String docID: allTextsFromTheFile.keySet())
             {
-                /**
-                 * TODO: 1) delete the doc name and doc number from params in the parser ; 2) if its a word to check if we need stemming
-                 */
+                //<editor-fold> des="Parse"
                 HashMap<String,Integer> listOfTerms = parser.parseDoc(allTextsFromTheFile.get(docID).toString(),docID);
+                //</editor-fold>
                 /**
-                 * TODO: remove the stop words.
+                 * remove the stop words from the list of terms which we got from parser
                  */
-                //remove here
-                //only remove !! add all before
-                //StopWords stopWords = new StopWords("C:\\My Little Project",listOfTerms);
+                //<editor-fold> des="Stop Words"
+                stopWords.removeStopWords(listOfTerms);
+                //</editor-fold>
 
-                /**
-                 * TODO: stemming!
-                 */
-                if (stemming == true)
+                //<editor-fold> des="Stemming"
+                HashMap<String,Integer> listOfTermsAfterStemming =null;
+                if (stemming)
                 {
+                    Stemmer Stemme = new Stemmer();
+                    listOfTermsAfterStemming = Stemme.Stemmer(listOfTerms);
                 }
-                //getting the information about each document.
-                getInfoOnDoc(listOfTerms,docID);
-                indexer.getPostingFileFromListOfTerms(listOfTerms,docID);
-                //HashSet<String> wordsForUpdate = indexer.getWordsToUpdateFromUpperToLower();
-                //UpdateTerms updateTerms = new UpdateTerms(pathForPostingFile,wordsForUpdate,indexer.getPostingFile());
-                //indexer.initWordsToUpdate();
+                //</editor-fold>
 
-                Thread thread;
-                writePostingFile.putPostingFile(indexer.getPostingFile());
-                thread = new Thread(writePostingFile);
-                thread.run();
-                thread.getName();
-                //writePostingFile.toWrite(indexer.getPostingFile());
+                //<editor-fold> des="Indexer"
+                if (listOfTermsAfterStemming == null)
+                {
+                    getInfoOnDoc(listOfTerms,docID);
+                    indexer.getPostingFileFromListOfTerms(listOfTerms,docID);
+                }
+                else
+                {
+                    getInfoOnDoc(listOfTermsAfterStemming,docID);
+                    indexer.getPostingFileFromListOfTerms(listOfTermsAfterStemming,docID);
+                }
+                //</editor-fold>
 
-                /**
-                 * Look init is here! need to change this!
-                 */
-                indexer.initNewPostingFile();
+
+
+
+
+                if(counterOfDocs == AMOUNT_OF_DOCS_IN_POSTING_FILE)
+                {
+                    counterOfDocs = 0;
+                    //<editor-fold> des="Writing"
+                    Thread thread;
+                    writePostingFile.putPostingFile(indexer.getPostingFile());
+                    thread = new Thread(writePostingFile);
+                    thread.run();
+                    thread.getName();
+
+
+                    //writePostingFile.toWrite(indexer.getPostingFile());
 
 //                ExecutorService executorService = Executors.newFixedThreadPool(1);
 //                Runnable test = new WritePostingFile("C:\\My Little Project\\PostingFile",indexer.getPostingFile());
@@ -88,6 +110,14 @@ public class Manager {
 ////
 //                  executorService.shutdown();
 //                  while (!executorService.isTerminated()){}
+
+                    //</editor-fold>
+
+                    /**
+                     * Clean Posting file from the memory
+                     */
+                    indexer.initNewPostingFile();
+                }
                 System.out.println("After one document");
 
             }
