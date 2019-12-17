@@ -258,8 +258,7 @@ public class Parser implements IParser{
 		sb2.setLength(0);
 		while (matcher.find())
 		{
-			addpatternNumbersCommasToHash(terms_Hash,matcher.group());
-			matcher.appendReplacement(sb2, " ");
+			addToHash(terms_Hash,matcher.group());
 		}
 		matcher.appendTail(sb2);
 
@@ -568,7 +567,7 @@ public class Parser implements IParser{
 		Matcher matcher  = Pattern.compile("[,]").matcher(num);
 		while (matcher.find())
 		{
-			matcher.appendReplacement(sb1, " ");
+			matcher.appendReplacement(sb1, "");
 		}
 		matcher.appendTail(sb1);
 
