@@ -42,7 +42,7 @@ public class Manager {
         /**
          * TODO:Get path for Stop Words
          */
-        StopWords stopWords = new StopWords("C:\\Users\\user1\\Desktop\\masters\\השלמה\\information_retrieval\\project\\Stop Words.txt");
+        StopWords stopWords = new StopWords("C:\\Users\\grigorer\\Desktop\\Project\\Stop Words.txt");
         for (String file:allFiles)
         {
             HashMap<String,StringBuilder> allTextsFromTheFile = fileReader.getTextsFromTheFile(new File(file));
