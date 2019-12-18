@@ -25,8 +25,6 @@ enum types
 }
 
 public class Parser implements IParser{
-	//pre-parse
-	Pattern patternSpaces = Pattern.compile("[ ]{1,}");
 
 	//Percentage
 	Pattern patternEndsWithPercentageSign = Pattern.compile("[0-9]{1,}([\\.][0-9]{1,})?([ ]{1,})?[%]"); //Number%
@@ -80,9 +78,8 @@ public class Parser implements IParser{
 	public HashMap<String,Integer> parseDoc(String doc_Text, String doc_Number)
 	{
 		HashMap<String,Integer> termsHash= new HashMap<>();
-		StringBuffer sb1 = new StringBuffer(),sb2=new StringBuffer() ;
+		StringBuffer sb1 = new StringBuffer(doc_Text),sb2=new StringBuffer() ;
 
-		sb1=parseSpaces(termsHash, doc_Text);
 		parseNames(termsHash,sb1);
 		sb2=parsePercent(termsHash, sb1);
 		sb1=parseDate(termsHash,sb2);
@@ -94,7 +91,7 @@ public class Parser implements IParser{
 
 		parseEndWords(termsHash,sb2);
 
-		//printHash(termsHash);
+		printHash(termsHash);
 	    
 		return termsHash;
 	}
@@ -177,20 +174,6 @@ public class Parser implements IParser{
 		}
 	}
 
-
-	StringBuffer parseSpaces(HashMap<String,Integer> terms_Hash, String doc_Text )
-	{
-		StringBuffer sb1 = new StringBuffer();
-
-		Matcher matcher  = patternSpaces.matcher(doc_Text);
-		while (matcher.find())
-		{
-			matcher.appendReplacement(sb1, " ");
-		}
-		matcher.appendTail(sb1);
-
-		return sb1;
-	}
 
 	StringBuffer parseExpressions(HashMap<String,Integer> terms_Hash, StringBuffer doc_Text)
 	{

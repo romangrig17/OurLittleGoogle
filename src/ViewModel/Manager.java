@@ -42,7 +42,7 @@ public class Manager {
         /**
          * TODO:Get path for Stop Words
          */
-        StopWords stopWords = new StopWords("C:\\My Little Project\\05 stop_words.txt");
+        StopWords stopWords = new StopWords("C:\\Users\\user1\\Desktop\\masters\\השלמה\\information_retrieval\\corpus\\corpus\\Stop_words.txt");
         // create a pool of threads, 5 max jobs will execute in parallel
         ExecutorService threadPool = Executors.newFixedThreadPool(5);
         //run on all files

@@ -14,7 +14,7 @@ public class Main {
         //GUI gui = new GUI();
 
         boolean stemming = false;
-        Manager manager = new Manager("C:\\My Little Project\\corpus\\corpus","C:\\My Little Project\\PostingFile",stemming);
+        Manager manager = new Manager("C:\\Users\\user1\\Desktop\\masters\\השלמה\\information_retrieval\\corpus\\corpus\\corpus","C:\\Users\\user1\\Desktop\\masters\\השלמה\\information_retrieval\\corpus\\corpus\\write",stemming);
 
 
         long elapsedTime = System.currentTimeMillis() - start;
