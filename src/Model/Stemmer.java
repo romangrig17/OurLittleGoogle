@@ -60,12 +60,23 @@ public class Stemmer
 
     public HashMap<String,Integer> Stemmer(HashMap<String,Integer> listOfTerms)
     {
+        //stemming for each doc
         HashMap<String,Integer> listOfTermsAfterStemming = new HashMap<>();
+
         for (String termBeforeStemming : listOfTerms.keySet())
         {
-            if (!(termBeforeStemming.charAt(0)>='0' && termBeforeStemming.charAt(0)<='9') && !Pattern.matches("[_ .,-;'/\t]",termBeforeStemming))
+            if (!(termBeforeStemming.charAt(0)>='0' && termBeforeStemming.charAt(0)<='9') && termBeforeStemming.length() > 1)
             {
-                listOfTermsAfterStemming.put(Stemming(termBeforeStemming),listOfTerms.get(termBeforeStemming));
+                String termAfterStemming = Stemming(termBeforeStemming);
+                if (listOfTermsAfterStemming.containsKey(termAfterStemming))
+                {
+                    Integer amountOfTheTermInTheDoc = listOfTerms.get(termBeforeStemming) + listOfTermsAfterStemming.get(termAfterStemming);
+                    listOfTermsAfterStemming.put(termAfterStemming,amountOfTheTermInTheDoc);
+                }
+                else
+                {
+                    listOfTermsAfterStemming.put(termAfterStemming,listOfTerms.get(termBeforeStemming));
+                }
             }
             else
             {

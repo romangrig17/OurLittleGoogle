@@ -13,12 +13,12 @@ public class Main {
         long start = System.currentTimeMillis();
         //GUI gui = new GUI();
 
-        boolean stemming = false;
-        Manager manager = new Manager("C:\\Users\\user1\\Desktop\\masters\\השלמה\\information_retrieval\\corpus\\corpus\\corpus","C:\\Users\\user1\\Desktop\\masters\\השלמה\\information_retrieval\\corpus\\corpus\\write",stemming);
+        boolean stemming = true;
+        Manager manager = new Manager("C:\\My Little Project\\corpus\\corpus","C:\\My Little Project\\PostingFile",stemming);
 
 
         long elapsedTime = System.currentTimeMillis() - start;
-        System.out.println("The time of program: " + (elapsedTime/60000) + " Min");
+        System.out.println("The time of program: " + Double.longBitsToDouble(elapsedTime/60000) + " Min");
     }
     
     

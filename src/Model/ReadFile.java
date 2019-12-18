@@ -33,7 +33,6 @@ public class ReadFile implements IReadFile {
             }
             ReadFromDirectory(currentDirectory);
         }
-        System.out.println("im here");
     }
 
     /**
@@ -46,7 +45,7 @@ public class ReadFile implements IReadFile {
         String[] docsInDir = directory.list();
 
         for (int i = 0; i < docsInDir.length; i++) {
-            File file = new File(dirName + "\\" + docsInDir[i]);
+            //File file = new File(dirName + "\\" + docsInDir[i]);
             allFiles.add(dirName + "\\" + docsInDir[i]);
         }
     }
@@ -67,7 +66,13 @@ public class ReadFile implements IReadFile {
 
                 if (st.contains("<DOCNO>")) {
                     String[] line = st.split(" ");
-                    docName = line[1];
+                    if (line.length == 1){
+                        docName = line[0];
+                    }
+                    else
+                    {
+                        docName = line[1];
+                    }
                 } else if (st.contains("<TEXT>")) {
                     StringBuilder onlyText = new StringBuilder();
 
