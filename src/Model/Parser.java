@@ -87,10 +87,9 @@ public class Parser implements IParser{
 		return termsHash;
 	}
 	
-	//TODO-in case of number keep them too
 	void parseEndWords(HashMap<String,Integer> terms_Hash, StringBuffer doc_Text)
 	{
-		StringBuffer sb1 = new StringBuffer(),sb2=new StringBuffer() ;
+		StringBuffer sb1 = new StringBuffer() ;
 		Matcher matcher  = Pattern.compile("\\(|\\)|\\]|\\[|\\\\|\\/|,|:|\\$|\\.|\\+|\\*|-").matcher(doc_Text);
 		while (matcher.find())
 		{
