@@ -97,7 +97,6 @@ public class Parser implements IParser{
 		Matcher matcher  = patternEntity.matcher(doc_Text);
 		while (matcher.find())
 		{
-			System.out.println("adding Entity: "+matcher.group());
 			addToHash(terms_Hash,matcher.group());
 		}
 		matcher.appendTail(sb1);
@@ -115,21 +114,14 @@ public class Parser implements IParser{
 		
 		String[] allWords = sb1.toString().split(" ");		
 	    int allWordsLength = allWords.length;
-	    System.out.println("leftover size: "+allWords.length);
 	    for(int i = 0; i<allWordsLength; i++)
         {
 	    	
 	    	if(allWords[i].matches("[A-z]{2,}('|'[A-z]{1,})?[A-z]{1,}"))
 	    	{
-	    		System.out.println("adding leftovers: "+allWords[i]);
 	    		addToHash(terms_Hash,allWords[i]);
 	    	}
-	    	else
-	    	{
-	    		System.out.println("not adding: "+allWords[i]);
-	    	}
         }
-	    
 	}
 
 	void printHash(HashMap<String,Integer> terms_Hash)
@@ -161,31 +153,25 @@ public class Parser implements IParser{
 		StringBuffer sb2 = new StringBuffer();
 		 
 		Matcher matcher=patternWordWordWord.matcher(doc_Text);
-		System.out.println("start patternWordWordWord !!!");
 		while (matcher.find()) 
 		{
-			System.out.println("match: "+matcher.group());
 			addToHash(terms_Hash,matcher.group());
 			matcher.appendReplacement(sb1, " ");
 		}
 		matcher.appendTail(sb1);
 
 		matcher=patternWordWord.matcher(sb1);
-		System.out.println("start patternWordWord !!!");
 		while (matcher.find()) 
 		{
-			System.out.println("match: "+matcher.group());
 			addToHash(terms_Hash,matcher.group());
 			matcher.appendReplacement(sb2, " ");
 		}
 		matcher.appendTail(sb2);
 
 		sb1.setLength(0);
-		matcher=patternNumberWord.matcher(sb2);
-		System.out.println("start patternNumberWord !!!");
+		matcher=patternNumberWord.matcher(sb2);;
 		while (matcher.find()) 
 		{
-			System.out.println("match: "+matcher.group());
 			addpatternNumberWordToHash(terms_Hash,matcher.group());
 			matcher.appendReplacement(sb1, " ");
 		}
@@ -193,10 +179,8 @@ public class Parser implements IParser{
 		
 		sb2.setLength(0);
 		matcher=patternWordNumber.matcher(sb1);
-		System.out.println("start patternWordNumber !!!");
 		while (matcher.find()) 
 		{
-			System.out.println("match: "+matcher.group());
 			addpatternWordNumberToHash(terms_Hash,matcher.group());
 			matcher.appendReplacement(sb2, " ");
 		}
@@ -204,21 +188,17 @@ public class Parser implements IParser{
 		
 		sb1.setLength(0);
 		matcher=patternNumberNumber.matcher(sb2);
-		System.out.println("start patternNumberNumber !!!");
 		while (matcher.find()) 
 		{
-			System.out.println("match: "+matcher.group());
 			addpatternNumberNumberToHash(terms_Hash,matcher.group());
 			matcher.appendReplacement(sb1, " ");
 		}
 		matcher.appendTail(sb1);
 			
 		sb2.setLength(0);
-		matcher=patternBetweenNumberAndNumber.matcher(sb1);
-		System.out.println("start patternBetweenNumberAndNumber !!!");
+		matcher=patternBetweenNumberAndNumber.matcher(sb1);;
 		while (matcher.find()) 
 		{
-			System.out.println("match: "+matcher.group());
 			addToHash(terms_Hash,matcher.group());//not clearing- we want to add as regular number too
 		}
 		matcher.appendTail(sb2);
@@ -265,12 +245,10 @@ public class Parser implements IParser{
 	StringBuffer parseNumbers(HashMap<String,Integer>terms_Hash, StringBuffer doc_Text)
 	{
 
-		System.out.println("start parseNumbers !!!");
 		StringBuffer sb1 = new StringBuffer();
 		StringBuffer sb2 = new StringBuffer();
 
 		Matcher matcher=patternNumbersThousand.matcher(doc_Text);
-		System.out.println("start patternNumbersThousand !!!");
 		while (matcher.find())
 		{
 			addpatternNumbersThousandToHash(terms_Hash,matcher.group());
@@ -279,7 +257,6 @@ public class Parser implements IParser{
 		matcher.appendTail(sb1);
 
 		matcher=patternNumbersMillion.matcher(sb1);
-		System.out.println("start patternNumbersMillion !!!");
 		while (matcher.find())
 		{
 			addpatternNumbersMillionToHash(terms_Hash,matcher.group());
@@ -289,7 +266,6 @@ public class Parser implements IParser{
 
 		sb1.setLength(0);
 		matcher=patternNumbersBillion.matcher(sb2);
-		System.out.println("start patternNumbersBillion !!!");
 		while (matcher.find())
 		{
 			addpatternNumbersBillionToHash(terms_Hash,matcher.group());
@@ -297,7 +273,6 @@ public class Parser implements IParser{
 		}
 		matcher.appendTail(sb1);
 
-		System.out.println("start patternNumbersFraction !!!");
 		matcher=patternNumbersFraction.matcher(sb1);
 		sb2.setLength(0);
 		while (matcher.find())
@@ -307,7 +282,6 @@ public class Parser implements IParser{
 		matcher.appendTail(sb2);
 
 
-		System.out.println("start patternNumbersCommas !!!");
 		matcher=patternNumbersCommas.matcher(sb2);
 		sb1.setLength(0);
 		while (matcher.find())
@@ -319,7 +293,6 @@ public class Parser implements IParser{
 
 		matcher=patternNumbers.matcher(sb1);
 		sb2.setLength(0);
-		System.out.println("start patternNumbers !!!");
 		while (matcher.find())
 		{
 			addpatternNumbersToHash(terms_Hash,matcher.group());
@@ -333,23 +306,19 @@ public class Parser implements IParser{
 
 	void addpatternNumbersThousandToHash(HashMap<String,Integer> termsHash,String match )
 	{
-		System.out.println("match Thousand: "+ match);
 		addToHash(termsHash,match.subSequence(1,match.length()-"Thousand".length()-1).toString()+"K");
 	}
 	void addpatternNumbersMillionToHash(HashMap<String,Integer> termsHash,String match )
 	{
-		System.out.println("match Million: "+ match);
 		addToHash(termsHash,match.subSequence(1,match.length()-"Million".length()-1).toString()+"M");
 	}
 	void addpatternNumbersBillionToHash(HashMap<String,Integer> termsHash, String match )
 	{
-		System.out.println("match Billion: "+ match);
 		addToHash(termsHash,match.subSequence(1,match.length()-"Billion".length()-1).toString()+"B");
 	}
 
 	void addpatternNumbersToHash(HashMap<String,Integer> termsHash,String match )
 	{
-		System.out.println("match addpatternNumbersToHash: "+ match);
 		match= upToThreeNubersAfterDot(match);
 		types t = checkNumSize(match);
 		Float num;
@@ -379,7 +348,6 @@ public class Parser implements IParser{
 
 	void addpatternNumbersCommasToHash(HashMap<String,Integer> termsHash,String match )
 	{
-		System.out.println("match Commas: "+ match);
 		match=removeComma(match);
 		addpatternNumbersToHash(termsHash,match);
 	}
@@ -393,7 +361,6 @@ public class Parser implements IParser{
 		Matcher matcher  = patternDollarSignMillion.matcher(doc_Text);//$price million
 		while (matcher.find())
 		{
-			System.out.println("match patternDollarSignMillion: "+ matcher.group());
 			addpatternDollarSignMillionToHash(terms_Hash, matcher.group());
 			matcher.appendReplacement(sb1, " ");
 		}
@@ -402,7 +369,6 @@ public class Parser implements IParser{
 		matcher  = patternDollarSignBillion.matcher(sb1);//$price billion
 		while (matcher.find())
 		{
-			System.out.println("match patternDollarSignBillion: "+ matcher.group());
 			addpatternDollarSignBillionToHash(terms_Hash, matcher.group());
 			matcher.appendReplacement(sb2, " ");
 		}
@@ -412,7 +378,6 @@ public class Parser implements IParser{
 		matcher  = patternDollarSign.matcher(sb2);//$price
 		while (matcher.find())
 		{
-			System.out.println("match patternDollarSign: "+ matcher.group());
 			addpatternDollarSignToHash(terms_Hash, matcher.group());
 			matcher.appendReplacement(sb1, " ");
 		}
@@ -422,7 +387,6 @@ public class Parser implements IParser{
 		matcher  = patternFractionDollar.matcher(sb1);//Price fraction Dollars
 		while (matcher.find())
 		{
-			System.out.println("match patternFractionDollar: "+ matcher.group());
 			addpatternFractionDollarToHash(terms_Hash, matcher.group());
 			matcher.appendReplacement(sb2, " ");
 		}
@@ -432,7 +396,6 @@ public class Parser implements IParser{
 		matcher  = patternDollar.matcher(sb2);//Price Dollars
 		while (matcher.find())
 		{
-			System.out.println("match patternDollar: "+ matcher.group());
 			addpatternDollarToHash(terms_Hash, matcher.group());
 			matcher.appendReplacement(sb1, " ");
 		}
@@ -442,7 +405,6 @@ public class Parser implements IParser{
 		matcher  = patternMDollar.matcher(sb1);//Price m Dollars
 		while (matcher.find())
 		{
-			System.out.println("match patternMDollar: "+ matcher.group());
 			addpatternMDollarToHash(terms_Hash, matcher.group());
 			matcher.appendReplacement(sb2, " ");
 		}
@@ -452,7 +414,6 @@ public class Parser implements IParser{
 		matcher  = patternBnDollar.matcher(sb2);//Price bn Dollars
 		while (matcher.find())
 		{
-			System.out.println("match patternBnDollar: "+ matcher.group());
 			addpatternBnDollarToHash(terms_Hash, matcher.group());
 			matcher.appendReplacement(sb1, " ");
 		}
@@ -462,7 +423,6 @@ public class Parser implements IParser{
 		matcher  = patternBillionUSDollar.matcher(sb1);//Price billion U.S. dollars
 		while (matcher.find())
 		{
-			System.out.println("match patternBillionUSDollar: "+ matcher.group());
 			addpatternBillionUSDollarToHash(terms_Hash, matcher.group());
 			matcher.appendReplacement(sb2, " ");
 		}
@@ -472,7 +432,6 @@ public class Parser implements IParser{
 		matcher  = patternMillionUSDollar.matcher(sb2);//Price million U.S. dollars
 		while (matcher.find())
 		{
-			System.out.println("match patternMillionUSDollar: "+ matcher.group());
 			addpatternMillionUSDollarToHash(terms_Hash, matcher.group());
 			matcher.appendReplacement(sb1, " ");
 		}
@@ -482,7 +441,6 @@ public class Parser implements IParser{
 		matcher  = patternTrillionUSDollar.matcher(sb1);//Price trillion U.S. dollars
 		while (matcher.find())
 		{
-			System.out.println("match patternTrillionUSDollar: "+ matcher.group());
 			addpatternTrillionUSDollarToHash(terms_Hash, matcher.group());
 			matcher.appendReplacement(sb2, " ");
 		}
@@ -493,19 +451,16 @@ public class Parser implements IParser{
 
 	void addpatternDollarSignMillionToHash(HashMap<String,Integer> termsHash,String match )//$price million -> price M Dollars
 	{
-		System.out.println("match: "+ match);
 		addToHash(termsHash,match.subSequence(1,match.length()-"million".length()-1).toString()+" M Dollars");
 	}
 
 	void addpatternDollarSignBillionToHash(HashMap<String,Integer> termsHash,String match )//$price billion ->price M Dollars
 	{
-		System.out.println("match: "+ match);
 		addToHash(termsHash,match.subSequence(1,match.length()-"billion".length()-1).toString()+"000"+" M Dollars");;
 	}
 
 	void addpatternDollarSignToHash(HashMap<String,Integer> termsHash,String match )//$price -> above 1M- save as price M Dollars, else save as price Dollars
 	{
-		System.out.println("match: "+ match);
 		match= upToThreeNubersAfterDot(match.subSequence(1,match.length()).toString());
 		match=removeComma(match);
 		types t = checkNumSize(match);
@@ -521,13 +476,11 @@ public class Parser implements IParser{
 
 	void addpatternFractionDollarToHash(HashMap<String,Integer> termsHash,String match )//Price fraction Dollars-> save the same
 	{
-		System.out.println("match: "+ match);
 		addToHash(termsHash,match);
 	}
 
 	void addpatternDollarToHash(HashMap<String,Integer> termsHash,String match )//Price Dollars-> above 1M- save as price M Dollars, else save as price Dollars
 	{
-		System.out.println("match: "+ match);
 		match= upToThreeNubersAfterDot(match.subSequence(0,match.length()-"Dollars".length()-1).toString());
 		match=removeComma(match);
 		types t = checkNumSize(match);
@@ -543,7 +496,6 @@ public class Parser implements IParser{
 
 	void addpatternMDollarToHash(HashMap<String,Integer> termsHash,String match )//Price m Dollars --> Price M Dollars
 	{
-		System.out.println("match: "+ match);
 		int idxspace=match.indexOf(" ");
 		int idxm=match.indexOf("m");
 		int min;
@@ -561,7 +513,6 @@ public class Parser implements IParser{
 
 	void addpatternBnDollarToHash(HashMap<String,Integer> termsHash,String match )//Price bn Dollars
 	{
-		System.out.println("match: "+ match);
 		match=removeComma(match);
 		int idxspace=match.indexOf(" ");
 		int idxb=match.indexOf("b");
@@ -579,7 +530,6 @@ public class Parser implements IParser{
 
 	void addpatternBillionUSDollarToHash(HashMap<String,Integer> termsHash,String match )//Price billion U.S. dollars
 	{
-		System.out.println("match: "+ match);
 		match=removeComma(match);
 		int idxspace=match.indexOf(" ");
 
@@ -588,7 +538,6 @@ public class Parser implements IParser{
 
 	void addpatternMillionUSDollarToHash(HashMap<String,Integer>termsHash, String match )//Price million U.S. dollars
 	{
-		System.out.println("match: "+ match);
 		match=removeComma(match);
 		int idxspace=match.indexOf(" ");
 
@@ -597,7 +546,6 @@ public class Parser implements IParser{
 
 	void addpatternTrillionUSDollarToHash(HashMap<String,Integer> termsHash, String match )//Price trillion U.S. dollars
 	{
-		System.out.println("match: "+ match);
 		match=removeComma(match);
 		int idxspace=match.indexOf(" ");
 
@@ -620,7 +568,6 @@ public class Parser implements IParser{
 
 	String upToThreeNubersAfterDot(String num)
 	{
-		//TODO -if the word is a number and he got more then 3 numbers after the dot (.)
 		if(Pattern.matches("[0-9]{1,}[.][0-9]{4,}",num))
 		{
 			int idx=num.indexOf(".");
@@ -672,7 +619,6 @@ public class Parser implements IParser{
 		Matcher matcher  = patternDDMonth.matcher(doc_Text);
 		while (matcher.find())
 		{
-			//System.out.println("match: "+ matcher.group());
 			addpatternDDMonthToHash(terms_Hash, matcher.group());
 			matcher.appendReplacement(sb1, " ");
 		}
@@ -681,7 +627,6 @@ public class Parser implements IParser{
 		matcher  = patternMonthDD.matcher(sb1);
 		while (matcher.find())
 		{
-			//System.out.println("match: "+ matcher.group());
 			addpatternMonthDDToHash(terms_Hash, matcher.group());
 			matcher.appendReplacement(sb2, " ");
 		}
@@ -691,7 +636,6 @@ public class Parser implements IParser{
 		matcher  = patternMonthYear.matcher(sb2);
 		while (matcher.find())
 		{
-			//System.out.println("match year: "+ matcher.group());
 			addpatternMonthYearToHash(terms_Hash, matcher.group());
 			matcher.appendReplacement(sb1, " ");
 		}
@@ -764,7 +708,6 @@ public class Parser implements IParser{
 
 	void addToHash(HashMap<String,Integer> termsHash, String term )
 	{
-		System.out.println("adding: "+ term);
 		if(!termsHash.containsKey(term))
 		{
 			termsHash.put(term,1);
