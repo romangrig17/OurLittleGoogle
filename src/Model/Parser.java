@@ -67,8 +67,12 @@ public class Parser implements IParser{
 	Pattern patternNumbersBillion = Pattern.compile("[0-9]{1,}([\\.][0-9]{1,})?([ ]{1,})?[ ](Billion)");
 	
 	//Names
-	Pattern patternEntity= Pattern.compile("[A-Z]{1}[a-z]{1,}[ |-][A-Z]{1,}[a-z]{1,}([ |-][A-Z]{1}[a-z]{1,}([ |-][A-Z]{1,}[a-z]{1,})?)?");
+	Pattern patternEntity= Pattern.compile("[A-Z]{1}[a-z]{1,}[ ][A-Z]{1,}[a-z]{1,}([ |-][A-Z]{1}[a-z]{1,}([ |-][A-Z]{1,}[a-z]{1,})?)?");
 
+	//KG
+	Pattern patternKG= Pattern.compile("[0-9]{1,}([\\\\.][0-9]{1,})?([ ])?(KG|kg|Kg)");
+
+	
 	
 	//first string is the term string,int is the count
 	public HashMap<String,Integer> parseDoc(String doc_Text, String doc_Number)
@@ -82,13 +86,28 @@ public class Parser implements IParser{
 		sb1=parseDate(termsHash,sb2);
 		sb2=parsePrices(termsHash,sb1);
 		sb1=parseExpressions(termsHash,sb2);
-		sb2=parseNumbers(termsHash,sb1);
+		sb2=parseKG(termsHash,sb1);		
+		sb1=parseNumbers(termsHash,sb2);
 
-		parseEndWords(termsHash,sb2);
+		parseEndWords(termsHash,sb1);
 
 		//printHash(termsHash);
 	    
 		return termsHash;
+	}
+
+
+	StringBuffer parseKG(HashMap<String,Integer> terms_Hash, StringBuffer doc_Text)
+	{
+		StringBuffer sb1 = new StringBuffer() ;
+		Matcher matcher  = patternKG.matcher(doc_Text);
+		while (matcher.find())
+		{
+			addToHash(terms_Hash,matcher.group());
+			matcher.appendReplacement(sb1, "");
+		}
+		matcher.appendTail(sb1);
+		return sb1;
 	}
 	
 	void parseNames(HashMap<String,Integer> terms_Hash, StringBuffer doc_Text)
@@ -97,7 +116,7 @@ public class Parser implements IParser{
 		Matcher matcher  = patternEntity.matcher(doc_Text);
 		while (matcher.find())
 		{
-			addToHash(terms_Hash,matcher.group());
+			addToHash(terms_Hash,"!"+matcher.group());
 		}
 		matcher.appendTail(sb1);
 	}
@@ -105,7 +124,7 @@ public class Parser implements IParser{
 	void parseEndWords(HashMap<String,Integer> terms_Hash, StringBuffer doc_Text)
 	{
 		StringBuffer sb1 = new StringBuffer() ;
-		Matcher matcher  = Pattern.compile("\\(|\\)|\\]|\\[|\\\\|\\/|,|:|\\$|\\.|\\+|\\*|-|'|'|_|`").matcher(doc_Text);
+		Matcher matcher  = Pattern.compile("\\(|\\)|\\]|\\[|\\\\|\\/|,|:|\\$|\\.|\\+|\\*|-|'|'|_|`|!|@|#|%|\\^|\"|&|;|\\?").matcher(doc_Text);
 		while (matcher.find())
 		{
 			matcher.appendReplacement(sb1, "");
@@ -117,7 +136,7 @@ public class Parser implements IParser{
 	    for(int i = 0; i<allWordsLength; i++)
         {
 	    	
-	    	if(allWords[i].matches("[A-z]{2,}('|'[A-z]{1,})?[A-z]{1,}"))
+	    	if(allWords[i].matches("[A-z]{2,}"))
 	    	{
 	    		addToHash(terms_Hash,allWords[i]);
 	    	}
