@@ -51,10 +51,10 @@ public class Parser implements IParser{
 	Pattern patternTrillionUSDollar = Pattern.compile("(\\d{1,3},\\d{3}(,\\d{3})*)(\\.\\d*)?[ ](trillion U.S. dollars)|\\d+\\.?\\d*[ ](trillion U.S. dollars)");//Price trillion U.S. dollars
 
 	//expressions
-	Pattern patternWordWordWord= Pattern.compile("[A-z]{1,}[-][A-z]{1,}[-][A-z]{1,}"); //Word-word-word (for example: step-by-step)
-	Pattern patternWordWord = Pattern.compile("[A-z]{1,}[-][A-z]{1,}"); //Word-word (for example: Value-added)
-	Pattern patternNumberWord= Pattern.compile("\\d{1,}[-][A-z]{1,}");  //Number-word (for example: 10-part )
-	Pattern patternWordNumber= Pattern.compile("[A-z]{1,}[-]\\d{1,}"); //Word-Number (for example: part-10 )
+	Pattern patternWordWordWord= Pattern.compile("[A-z]{1,}('|'[A-z]{1,})?[-][A-z]{1,}('|'[A-z]{1,})?[-][A-z]{1,}('|'[A-z]{1,})?"); //Word-word-word (for example: step-by-step)
+	Pattern patternWordWord = Pattern.compile("[A-z]{1,}('|'[A-z]{1,})?[-][A-z]{1,}('|'[A-z]{1,})?"); //Word-word (for example: Value-added)
+	Pattern patternNumberWord= Pattern.compile("\\d{1,}[-][A-z]{1,}('|'[A-z]{1,})?");  //Number-word (for example: 10-part )
+	Pattern patternWordNumber= Pattern.compile("[A-z]{1,}('|'[A-z]{1,})?[-]\\d{1,}"); //Word-Number (for example: part-10 )
 	Pattern patternNumberNumber= Pattern.compile("\\d{1,}[-]\\d{1,}");//Number-number (for example: 6-7)
 	Pattern patternBetweenNumberAndNumber= Pattern.compile("(Between |between )\\d{1,}( and )\\d{1,}");//Between number and number (for example: between 18 and 24)		 
 
@@ -80,32 +80,40 @@ public class Parser implements IParser{
 		sb1=parseExpressions(termsHash,sb2);
 		sb2=parseNumbers(termsHash,sb1);
 
-		printHash(termsHash);
+		parseEndWords(termsHash,sb2);
 
-		String[] allWords = sb2.toString().split(" ");
+		//printHash(termsHash);
+	    
+		return termsHash;
+	}
+	
+	void parseEndWords(HashMap<String,Integer> terms_Hash, StringBuffer doc_Text)
+	{
+		StringBuffer sb1 = new StringBuffer() ;
+		Matcher matcher  = Pattern.compile("\\(|\\)|\\]|\\[|\\\\|\\/|,|:|\\$|\\.|\\+|\\*|-").matcher(doc_Text);
+		while (matcher.find())
+		{
+			matcher.appendReplacement(sb1, "");
+		}
+		matcher.appendTail(sb1);
+		
+		String[] allWords = sb1.toString().split(" ");		
 	    int allWordsLength = allWords.length;
-        
+	    System.out.println("leftover size: "+allWords.length);
 	    for(int i = 0; i<allWordsLength; i++)
         {
 	    	
-	    	if(allWords[i].matches("[A-z]{1,}"))
+	    	if(allWords[i].matches("[A-z]{2,}('|'[A-z]{1,})?[A-z]{1,}"))
 	    	{
 	    		System.out.println("adding leftovers: "+allWords[i]);
-	    		addToHash(termsHash,allWords[i]);
-	    	}
-	    	else if(allWords[i].matches("[A-z]{1,}(:|.|,|\\|//)"))
-	    	{
-	    		System.out.println("adding leftovers -1: "+allWords[i]);
-	    		addToHash(termsHash,allWords[i].substring(0, allWords[i].length()-1));
+	    		addToHash(terms_Hash,allWords[i]);
 	    	}
 	    	else
 	    	{
 	    		System.out.println("not adding: "+allWords[i]);
 	    	}
         }
-		
-		//System.out.println(sb2);
-		return termsHash;
+	    
 	}
 
 	void printHash(HashMap<String,Integer> terms_Hash)
@@ -131,7 +139,6 @@ public class Parser implements IParser{
 		return sb1;
 	}
 
-	//TODO-in case of number keep them too
 	StringBuffer parseExpressions(HashMap<String,Integer> terms_Hash, StringBuffer doc_Text)
 	{
 		StringBuffer sb1 = new StringBuffer();
