@@ -68,11 +68,11 @@ public class Parser implements IParser{
 	Pattern patternEntity= Pattern.compile("[A-Z]{1}[a-z]{1,}[ ][A-Z]{1,}[a-z]{1,}([ |-][A-Z]{1}[a-z]{1,}([ |-][A-Z]{1,}[a-z]{1,})?)?");
 
 	//KG
-	Pattern patternKG= Pattern.compile("[0-9]{1,}([\\\\.][0-9]{1,})?([ ])?(KG|kg|Kg)");
+	Pattern patternKG= Pattern.compile("[0-9]{1,}([\\\\.][0-9]{1,})?([ ])?(KG|kg|Kg|kilogram)");
 	
 	//phone number
-	Pattern patternPhoneNumber= Pattern.compile("[0-9]{3}[-][0-9]{7}");
-	Pattern patternPhoneNumber2= Pattern.compile("\\([0-9]{3}\\)[ ][0-9]{3}[ ]?[0-9]{4}");	
+	Pattern patternPhoneNumber= Pattern.compile("[0-9]{3}(-| )[0-9]{3}( )?[0-9]{4}");
+	Pattern patternPhoneNumber2= Pattern.compile("\\([0-9]{3}\\)[ ]?[0-9]{3}[ ]?[0-9]{4}");	
 	
 	//first string is the term string,int is the count
 	public HashMap<String,Integer> parseDoc(String doc_Text, String doc_Number)
