@@ -108,7 +108,6 @@ public class Manager {
                 System.out.println("After one document");
 
             }
-            System.out.println("Done with one file" + file);
         }
         System.out.println("Im Done Here");
         // once you've submitted your last job to the service it should be shut down
