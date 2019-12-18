@@ -65,6 +65,9 @@ public class Parser implements IParser{
 	Pattern patternNumbersThousand = Pattern.compile("[0-9]{1,}([\\.][0-9]{1,})?([ ]{1,})?[ ](Thousand)");
 	Pattern patternNumbersMillion = Pattern.compile("[0-9]{1,}([\\.][0-9]{1,})?([ ]{1,})?[ ](Million)");
 	Pattern patternNumbersBillion = Pattern.compile("[0-9]{1,}([\\.][0-9]{1,})?([ ]{1,})?[ ](Billion)");
+	
+	//Names
+	Pattern patternEntity= Pattern.compile("[A-Z]{1}[a-z]{1,}[ |-][A-Z]{1,}[a-z]{1,}([ |-][A-Z]{1}[a-z]{1,}([ |-][A-Z]{1,}[a-z]{1,})?)?");
 
 	
 	//first string is the term string,int is the count
@@ -74,6 +77,7 @@ public class Parser implements IParser{
 		StringBuffer sb1 = new StringBuffer(),sb2=new StringBuffer() ;
 
 		sb1=parseSpaces(termsHash, doc_Text);
+		parseNames(termsHash,sb1);
 		sb2=parsePercent(termsHash, sb1);
 		sb1=parseDate(termsHash,sb2);
 		sb2=parsePrices(termsHash,sb1);
@@ -87,10 +91,22 @@ public class Parser implements IParser{
 		return termsHash;
 	}
 	
+	void parseNames(HashMap<String,Integer> terms_Hash, StringBuffer doc_Text)
+	{
+		StringBuffer sb1 = new StringBuffer() ;
+		Matcher matcher  = patternEntity.matcher(doc_Text);
+		while (matcher.find())
+		{
+			System.out.println("adding Entity: "+matcher.group());
+			addToHash(terms_Hash,matcher.group());
+		}
+		matcher.appendTail(sb1);
+	}
+	
 	void parseEndWords(HashMap<String,Integer> terms_Hash, StringBuffer doc_Text)
 	{
 		StringBuffer sb1 = new StringBuffer() ;
-		Matcher matcher  = Pattern.compile("\\(|\\)|\\]|\\[|\\\\|\\/|,|:|\\$|\\.|\\+|\\*|-").matcher(doc_Text);
+		Matcher matcher  = Pattern.compile("\\(|\\)|\\]|\\[|\\\\|\\/|,|:|\\$|\\.|\\+|\\*|-|'|'").matcher(doc_Text);
 		while (matcher.find())
 		{
 			matcher.appendReplacement(sb1, "");
