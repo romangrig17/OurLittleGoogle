@@ -17,25 +17,6 @@ public class Main {
         Manager manager = new Manager("C:\\My Little Project\\corpus\\corpus","C:\\My Little Project\\PostingFile",stemming);
 
 
-        //<editor-fold des="old start">
-        //          ExecutorService executorService = Executors.newFixedThreadPool(1);
-//                  Runnable test = new ReadFile("C:\\Users\\roman\\OneDrive\\שולחן העבודה\\My Little Project\\corpus\\corpus");
-//
-//                  //((FilesReader) test).GetListOfDirs();
-//
-//                  for(int i=0; i<1 ; i++)
-//                  {
-//                      executorService.execute(test);
-//                  }
-//
-//                  executorService.shutdown();
-//
-//                  while (!executorService.isTerminated()){}
-//
-
-        //</editor-fold>
-
-
         long elapsedTime = System.currentTimeMillis() - start;
         System.out.println("The time of program: " + (elapsedTime/60000) + " Min");
     }

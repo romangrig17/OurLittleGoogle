@@ -34,7 +34,6 @@ public class Manager {
          * "C:\\My Little Project\\corpus\\corpus"
          * "C:\\My Little Project\\PostingFile"
          */
-        int tempCounter = 0;
         docsInfo = new StringBuilder();
         fileReader = new ReadFile(pathForCorpus);
         allFiles = fileReader.getAllFiles();
@@ -53,8 +52,16 @@ public class Manager {
             Iterator it = allTextsFromTheFile.keySet().iterator();
             for (String docID : allTextsFromTheFile.keySet()) {
                 //<editor-fold> des="Parse"
+
+
+                /**
+                 * Here you do the Parse
+                 */
                 HashMap<String, Integer> listOfTerms = parser.parseDoc(allTextsFromTheFile.get(docID).toString(), docID);
                 //</editor-fold>
+
+
+
                 /**
                  * remove the stop words from the list of terms which we got from parser
                  */
@@ -62,6 +69,9 @@ public class Manager {
                 stopWords.removeStopWords(listOfTerms);
                 //</editor-fold>
 
+                /**
+                 * here is the stemming
+                 */
                 //<editor-fold> des="Stemming"
                 HashMap<String, Integer> listOfTermsAfterStemming = null;
                 if (stemming) {
@@ -70,6 +80,9 @@ public class Manager {
                 }
                 //</editor-fold>
 
+                /**
+                 * here you can delete - this indexing the files
+                 */
                 //<editor-fold> des="Indexer"
                 if (listOfTermsAfterStemming == null) {
                     getInfoOnDoc(listOfTerms, docID);
@@ -80,14 +93,13 @@ public class Manager {
                 }
                 //</editor-fold>
 
+                /**
+                 * Here you can delete - this writing the files
+                 */
                 counterOfDocs++;
                 //<editor-fold des="Writing">
                 if (counterOfDocs == AMOUNT_OF_DOCS_IN_POSTING_FILE) {
-                    tempCounter++;
                     counterOfDocs = 0;
-//                    Thread thread;
-//                    thread = new Thread(writePostingFile);
-//                    thread.start();
                     writePostingFile.putPostingFile(indexer.getPostingFile());
                     threadPool.execute(writePostingFile);
                     indexer.initNewPostingFile();
