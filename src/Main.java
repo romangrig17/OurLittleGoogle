@@ -37,7 +37,7 @@ public class Main {
 
 
         long elapsedTime = System.currentTimeMillis() - start;
-        System.out.println("The time of program: " + elapsedTime);
+        System.out.println("The time of program: " + (elapsedTime/60000) + " Min");
     }
     
     

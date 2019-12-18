@@ -2,6 +2,7 @@ package Model;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.Semaphore;
 import java.util.regex.Pattern;
 
 public class WritePostingFile extends Thread  {
@@ -10,9 +11,11 @@ public class WritePostingFile extends Thread  {
      * TODO: change all to string builder, read with buff reader
      */
     StringBuilder pathToWrite;
-    //an hash map for NTT`s - if the list size >2 we will write them.
-    HashMap<String, LinkedList<String>> h_NTT;
+    //an hash map for Entity`s - if the list size >2 we will write them.
+    HashMap<String, LinkedList<String>> h_Entity;
     HashSet<String> namesOfPostingFile;
+
+    HashMap<String, Semaphore> semaphoreHashMap;
 
 
     private HashMap<String, HashMap<String,Integer>> postingFile;
@@ -27,8 +30,13 @@ public class WritePostingFile extends Thread  {
      */
     public WritePostingFile(StringBuilder pathToWrite) {
         this.pathToWrite = pathToWrite;
-        this.h_NTT = new HashMap<>();
+        this.h_Entity = new HashMap<>();
         this.namesOfPostingFile = new HashSet<>();
+        semaphoreHashMap = new HashMap<>();
+        for (int i=0; i<AMOUNT_OF_POSTING_FILES; i++)
+        {
+            semaphoreHashMap.put(Integer.toString(i),new Semaphore(1));
+        }
         //this.postingFile = postingFile;
     }
 
@@ -42,7 +50,7 @@ public class WritePostingFile extends Thread  {
         toWrite(postingFile);
     }
 
-    synchronized public boolean toWrite(HashMap<String, HashMap<String,Integer>> postingFile)
+    public boolean toWrite(HashMap<String, HashMap<String,Integer>> postingFile)
     {
         //goes on all terms
         /**
@@ -60,7 +68,7 @@ public class WritePostingFile extends Thread  {
                 if (infoPostingFile == null)
                     System.out.println("Problem to read from text in: " + termHashCode);
                 StringBuilder updatedText = infoPostingFile[0];
-                updateThePostingFile(infoPostingFile[1],updatedText);
+                updateThePostingFile(infoPostingFile[1],updatedText, termHashCode.toString());
 
             }
             else
@@ -96,10 +104,11 @@ public class WritePostingFile extends Thread  {
     }
 
 
-    synchronized private StringBuilder[] getTextFromFile(StringBuilder pathToWrite, String nameOfPostingFile,HashSet<String> hashOfTerms)
+    private StringBuilder[] getTextFromFile(StringBuilder pathToWrite, String nameOfPostingFile,HashSet<String> hashOfTerms)
     {
         try
         {
+            semaphoreHashMap.get(nameOfPostingFile).acquire();
             StringBuilder fullPath =(new StringBuilder(pathToWrite).append("\\").append(nameOfPostingFile).append(".txt"));
             File file = new File(fullPath.toString());
             BufferedReader br = new BufferedReader(new FileReader(file));
@@ -153,6 +162,7 @@ public class WritePostingFile extends Thread  {
             StringBuilder[] infoPostingFile = new StringBuilder[2];
             infoPostingFile[0] = text;
             infoPostingFile[1] = fullPath;
+            semaphoreHashMap.get(nameOfPostingFile).release();
             return infoPostingFile;
         }catch (Exception e)
         {
@@ -163,15 +173,16 @@ public class WritePostingFile extends Thread  {
         return null;
     }
 
-    synchronized private void updateThePostingFile(StringBuilder path, StringBuilder textInFile)
+    private void updateThePostingFile(StringBuilder path, StringBuilder textInFile, String termHashCode)
     {
-        File file = new File(path.toString());
         /**
          * TODO:check what faster, update or delete and write new
          */
         //file.delete();
         //BufferedWriter out = new BufferedWriter(new FileWriter(file), 32768);
         try {
+            semaphoreHashMap.get(termHashCode).acquire();
+            File file = new File(path.toString());
             //BufferedWriter out = new BufferedWriter(new FileWriter(file), 32768);
             //out.write(textInFile.toString());
             //out.close();
@@ -181,6 +192,7 @@ public class WritePostingFile extends Thread  {
             FileWriter writer = new FileWriter(file);
             writer.write(textInFile.toString());
             writer.close();
+            semaphoreHashMap.get(termHashCode).release();
         }
         catch (Exception e)
         {
@@ -188,11 +200,13 @@ public class WritePostingFile extends Thread  {
         }
     }
 
-    synchronized private void writeToDiskNewTextFile(StringBuilder path, String textName, String textInFile)
+    private void writeToDiskNewTextFile(StringBuilder path, String textName, String textInFile)
     {
-        StringBuilder pathToWrite = new StringBuilder(path).append("\\").append(textName).append(".txt");
-        File file = new File(pathToWrite.toString());
+
         try {
+            semaphoreHashMap.get(textName).acquire();
+            StringBuilder pathToWrite = new StringBuilder(path).append("\\").append(textName).append(".txt");
+            File file = new File(pathToWrite.toString());
             //Create the file
             file.createNewFile();
 //            BufferedWriter out = new BufferedWriter(new FileWriter(file), 32768);
@@ -202,6 +216,7 @@ public class WritePostingFile extends Thread  {
             FileWriter writer = new FileWriter(file);
             writer.write(textInFile);
             writer.close();
+            semaphoreHashMap.get(textName).release();
         }
         catch (Exception e)
         {
@@ -214,17 +229,17 @@ public class WritePostingFile extends Thread  {
      * @param postingFile - posting file that we have
      * @param term - the NTT
      */
-    synchronized private void addNewNtt(HashMap<String, HashMap<String,Integer>> postingFile,String term)
+    private void addNewNtt(HashMap<String, HashMap<String,Integer>> postingFile,String term)
     {
         Set<String> set_DocsName = postingFile.get(term).keySet();
-        if (h_NTT.containsKey(term))
+        if (h_Entity.containsKey(term))
         {
             LinkedList<String> listOfDocs = new LinkedList<>();
             for(String docName : set_DocsName)
             {
                 listOfDocs.add(docName + "#" + postingFile.get(term).get(docName));
             }
-            h_NTT.put(term,listOfDocs);
+            h_Entity.put(term,listOfDocs);
         }
         //if we see NTT for the first time
         else
@@ -233,7 +248,7 @@ public class WritePostingFile extends Thread  {
             for(String docName : set_DocsName)
             {
                 temp.add(docName + "#" + postingFile.get(term).get(docName) + ",");
-                h_NTT.put(term,temp);
+                h_Entity.put(term,temp);
             }
         }
     }
@@ -243,7 +258,7 @@ public class WritePostingFile extends Thread  {
         termsByHashCode = new HashMap<>();
         for (String term : postingFile.keySet())
         {
-            Integer termHashCode = (term.toLowerCase().hashCode()%amountOfPostingFiles);
+            Integer termHashCode = (Math.abs(term.toLowerCase().hashCode()%amountOfPostingFiles));
             if (termsByHashCode.containsKey(termHashCode))
             {
                 termsByHashCode.get(termHashCode).add(term);

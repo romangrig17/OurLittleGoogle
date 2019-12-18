@@ -8,6 +8,7 @@ import java.io.File;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Manager {
 
@@ -19,6 +20,7 @@ public class Manager {
     ArrayList<String> allFiles;
     StringBuilder sortedDictionary;
     StringBuilder docsInfo;
+    int counterOfDocs = 0;
 
     private static final int AMOUNT_OF_DOCS_IN_POSTING_FILE = 7500;
 
@@ -32,8 +34,7 @@ public class Manager {
          * "C:\\My Little Project\\corpus\\corpus"
          * "C:\\My Little Project\\PostingFile"
          */
-        //int counterOfDocs = 0;
-        //int tempCounter =0;
+        int tempCounter = 0;
         docsInfo = new StringBuilder();
         fileReader = new ReadFile(pathForCorpus);
         allFiles = fileReader.getAllFiles();
@@ -43,6 +44,9 @@ public class Manager {
          * TODO:Get path for Stop Words
          */
         StopWords stopWords = new StopWords("C:\\My Little Project\\05 stop_words.txt");
+        // create a pool of threads, 5 max jobs will execute in parallel
+        ExecutorService threadPool = Executors.newFixedThreadPool(5);
+        //run on all files
         for (String file : allFiles) {
             HashMap<String, StringBuilder> allTextsFromTheFile = fileReader.getTextsFromTheFile(new File(file));
             Parser parser = new Parser();
@@ -67,48 +71,27 @@ public class Manager {
                 //</editor-fold>
 
                 //<editor-fold> des="Indexer"
-//                if (listOfTermsAfterStemming == null) {
-//                    getInfoOnDoc(listOfTerms, docID);
-//                    indexer.getPostingFileFromListOfTerms(listOfTerms, docID);
-//                } else {
-//                    getInfoOnDoc(listOfTermsAfterStemming, docID);
-//                    indexer.getPostingFileFromListOfTerms(listOfTermsAfterStemming, docID);
-//                }
+                if (listOfTermsAfterStemming == null) {
+                    getInfoOnDoc(listOfTerms, docID);
+                    indexer.getPostingFileFromListOfTerms(listOfTerms, docID);
+                } else {
+                    getInfoOnDoc(listOfTermsAfterStemming, docID);
+                    indexer.getPostingFileFromListOfTerms(listOfTermsAfterStemming, docID);
+                }
                 //</editor-fold>
 
-                //counterOfDocs++;
-                //<editor-fold> des="Writing"
-//                if (counterOfDocs == AMOUNT_OF_DOCS_IN_POSTING_FILE) {
-//                    tempCounter++;
-//                    counterOfDocs = 0;
+                counterOfDocs++;
+                //<editor-fold des="Writing">
+                if (counterOfDocs == AMOUNT_OF_DOCS_IN_POSTING_FILE) {
+                    tempCounter++;
+                    counterOfDocs = 0;
 //                    Thread thread;
-//                    writePostingFile.putPostingFile(indexer.getPostingFile());
 //                    thread = new Thread(writePostingFile);
 //                    thread.start();
-//                    thread.getName();
-//
-//
-//                    //writePostingFile.toWrite(indexer.getPostingFile());
-//
-////                ExecutorService executorService = Executors.newFixedThreadPool(1);
-////                Runnable test = new WritePostingFile("C:\\My Little Project\\PostingFile",indexer.getPostingFile());
-////               // ((WritePostingFile) test).toWrite();
-////
-////                  for(int i=0; i<1 ; i++)
-////                  {
-////                      executorService.execute(test);
-////                  }
-//////
-////                  executorService.shutdown();
-////                  while (!executorService.isTerminated()){}
-//
-//
-//
-//                    /**
-//                     * Clean Posting file from the memory
-//                     */
-//                    indexer.initNewPostingFile();
-//                }
+                    writePostingFile.putPostingFile(indexer.getPostingFile());
+                    threadPool.execute(writePostingFile);
+                    indexer.initNewPostingFile();
+                }
                 //</editor-fold>
                 System.out.println("After one document");
 
@@ -116,12 +99,20 @@ public class Manager {
             System.out.println("Done with one file" + file);
         }
         System.out.println("Im Done Here");
+        // once you've submitted your last job to the service it should be shut down
+        threadPool.shutdown();
+        while (!threadPool.isTerminated()) {
+        }
     }
 
     private void getInfoOnDoc(HashMap<String, Integer> listOfTerms, String docName) {
-        if (listOfTerms != null && listOfTerms.size() >2 )
-        {
+        if (listOfTerms != null && listOfTerms.size() > 2) {
+            int counterAmount = 0;
+            for (Integer amount : listOfTerms.values()) {
+                counterAmount = counterAmount + amount;
+            }
             docsInfo.append("In Doc: ").append(docName).append(" was: ").append(listOfTerms.size()).append(" Terms");
+            docsInfo.append(" ,And the length of document is:").append(counterAmount);
             String popularTerm = Collections.max(listOfTerms.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
             docsInfo.append(" And the most popular term is: ").append(popularTerm).append(" And he appeared: ").append(listOfTerms.get(popularTerm)).append(" times. \n");
         }
