@@ -33,21 +33,23 @@ public class Indexer {
         for (String term: listOfTerms.keySet())
         {
             //only for now
+            //check what we got from parser
             if (term.length() == 0 || term.charAt(0) == '[' || term.charAt(0) == '.' || term.charAt(0) == '('
                     || term.charAt(0) == ']' || term.charAt(0) == ')' || term.charAt(0) == ',' || term.charAt(0) == '"' ||
-                term.charAt(0) == '\'' || term.charAt(0) == '`' || term.charAt(0) == '_')
+                    term.charAt(0) == '\'' || term.charAt(0) == '`' || term.charAt(0) == '_' || term.charAt(0) == ' ')
             {
+                System.out.println(term);
                 continue;
             }
             //make all the term with upper letters if the first letter is upper
             String originalTerm = term;
             boolean ifTheWordIsWithUpperLetters = false;
-            if (originalTerm.charAt(0) >= 'A' && originalTerm.charAt(0) <= 'Z' && !(Pattern.matches("[ ]",originalTerm)))
+            if (originalTerm.charAt(0) >= 'A' && originalTerm.charAt(0) <= 'Z' && (originalTerm.charAt(0) != '!'))
             {
                 originalTerm = originalTerm.toUpperCase();
                 ifTheWordIsWithUpperLetters = true;
             }
-            else if (originalTerm.charAt(0) >= 'a' && originalTerm.charAt(0) <= 'z' && !(Pattern.matches("[ ]",originalTerm)))
+            else if (originalTerm.charAt(0) >= 'a' && originalTerm.charAt(0) <= 'z' && (originalTerm.charAt(0) != '!'))
             {
                 originalTerm = originalTerm.toLowerCase();
             }
@@ -64,12 +66,6 @@ public class Indexer {
                     originalTerm = originalTerm.toLowerCase();
                 }
             }
-            else if (originalTerm.contains(" ") && (Pattern.matches("[0-9]",originalTerm)))
-            {
-                //number!
-                System.out.println(originalTerm);
-            }
-
 
             if(dictionary.containsKey(originalTerm.toLowerCase()))
             {
@@ -204,7 +200,7 @@ public class Indexer {
                 addToDictionary(originalTerm,listOfTerms.get(term),docName);
             }
         }// for
-        System.out.println("Finish the posting file of: " + docName);
+        //System.out.println("Finish the posting file of: " + docName);
         return postingFile;
     }
 

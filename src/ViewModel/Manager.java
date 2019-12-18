@@ -13,8 +13,10 @@ import java.util.concurrent.TimeUnit;
 public class Manager {
 
 
+    //classes
     ReadFile fileReader;
     Indexer indexer;
+    WritePostingFile writePostingFile;
 
 
     ArrayList<String> allFiles;
@@ -38,11 +40,11 @@ public class Manager {
         fileReader = new ReadFile(pathForCorpus);
         allFiles = fileReader.getAllFiles();
         indexer = new Indexer();
-        WritePostingFile writePostingFile = new WritePostingFile(new StringBuilder(pathForPostingFile));
+        writePostingFile = new WritePostingFile(new StringBuilder(pathForPostingFile));
         /**
          * TODO:Get path for Stop Words
          */
-        StopWords stopWords = new StopWords("C:\\Users\\user1\\Desktop\\masters\\השלמה\\information_retrieval\\corpus\\corpus\\Stop_words.txt");
+        StopWords stopWords = new StopWords("C:\\My Little Project\\05 stop_words.txt");
         // create a pool of threads, 5 max jobs will execute in parallel
         ExecutorService threadPool = Executors.newFixedThreadPool(5);
         //run on all files
@@ -51,23 +53,18 @@ public class Manager {
             Parser parser = new Parser();
             Iterator it = allTextsFromTheFile.keySet().iterator();
             for (String docID : allTextsFromTheFile.keySet()) {
-                //<editor-fold> des="Parse"
-
 
                 /**
                  * Here you do the Parse
                  */
                 HashMap<String, Integer> listOfTerms = parser.parseDoc(allTextsFromTheFile.get(docID).toString(), docID);
-                //</editor-fold>
 
 
 
                 /**
                  * remove the stop words from the list of terms which we got from parser
                  */
-                //<editor-fold> des="Stop Words"
                 stopWords.removeStopWords(listOfTerms);
-                //</editor-fold>
 
                 /**
                  * here is the stemming
@@ -75,15 +72,13 @@ public class Manager {
                 //<editor-fold> des="Stemming"
                 HashMap<String, Integer> listOfTermsAfterStemming = null;
                 if (stemming) {
-                    Stemmer Stemme = new Stemmer();
-                    listOfTermsAfterStemming = Stemme.Stemmer(listOfTerms);
+                    Stemmer steaming = new Stemmer();
+                    listOfTermsAfterStemming = steaming.Stemmer(listOfTerms);
                 }
-                //</editor-fold>
 
                 /**
                  * here you can delete - this indexing the files
                  */
-                //<editor-fold> des="Indexer"
                 if (listOfTermsAfterStemming == null) {
                     getInfoOnDoc(listOfTerms, docID);
                     indexer.getPostingFileFromListOfTerms(listOfTerms, docID);
@@ -91,31 +86,38 @@ public class Manager {
                     getInfoOnDoc(listOfTermsAfterStemming, docID);
                     indexer.getPostingFileFromListOfTerms(listOfTermsAfterStemming, docID);
                 }
-                //</editor-fold>
 
                 /**
                  * Here you can delete - this writing the files
                  */
                 counterOfDocs++;
-                //<editor-fold des="Writing">
                 if (counterOfDocs == AMOUNT_OF_DOCS_IN_POSTING_FILE) {
                     counterOfDocs = 0;
                     writePostingFile.putPostingFile(indexer.getPostingFile());
                     threadPool.execute(writePostingFile);
                     indexer.initNewPostingFile();
                 }
-                //</editor-fold>
-                System.out.println("After one document");
-
+                //System.out.println("After one document");
             }
         }
+        //if there is more unwritten files
+        if (counterOfDocs > 0)
+        {
+            writePostingFile.putPostingFile(indexer.getPostingFile());
+            writePostingFile.run();
+        }
+
+        //writing all the entity
+        writePostingFile.writeTheEntity();
+
         System.out.println("Im Done Here");
+        System.out.println("The amount of unique terms: " + indexer.getDictionary().size());
         // once you've submitted your last job to the service it should be shut down
         threadPool.shutdown();
-        while (!threadPool.isTerminated()) {
-        }
+        while (!threadPool.isTerminated()) {}
     }
 
+    //<editor-fold des="Help Function For GUI>
     private void getInfoOnDoc(HashMap<String, Integer> listOfTerms, String docName) {
         if (listOfTerms != null && listOfTerms.size() > 2) {
             int counterAmount = 0;
@@ -148,4 +150,6 @@ public class Manager {
             sortedDictionary.append("Term: ").append(entry.getKey()).append("Amount of performances").append(entry.getValue().split(",")[0]).append("\n");
         }
     }
+
+    //</editor-fold>
 }

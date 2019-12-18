@@ -91,7 +91,7 @@ public class Parser implements IParser{
 
 		parseEndWords(termsHash,sb2);
 
-		printHash(termsHash);
+		//printHash(termsHash);
 	    
 		return termsHash;
 	}
@@ -166,13 +166,13 @@ public class Parser implements IParser{
         }
 	}
 
-	void printHash(HashMap<String,Integer> terms_Hash)
-	{
-		for (String term: terms_Hash.keySet()){
-			String key = term.toString();
-			System.out.println("term is: "+key+" value is :"+terms_Hash.get(key));
-		}
-	}
+//	void printHash(HashMap<String,Integer> terms_Hash)
+//	{
+//		for (String term: terms_Hash.keySet()){
+//			String key = term.toString();
+//			//System.out.println("term is: "+key+" value is :"+terms_Hash.get(key));
+//		}
+//	}
 
 
 	StringBuffer parseExpressions(HashMap<String,Integer> terms_Hash, StringBuffer doc_Text)
