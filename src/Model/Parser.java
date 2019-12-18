@@ -71,8 +71,10 @@ public class Parser implements IParser{
 
 	//KG
 	Pattern patternKG= Pattern.compile("[0-9]{1,}([\\\\.][0-9]{1,})?([ ])?(KG|kg|Kg)");
-
 	
+	//phone number
+	Pattern patternPhoneNumber= Pattern.compile("[0-9]{3}[-][0-9]{7}");
+	Pattern patternPhoneNumber2= Pattern.compile("\\([0-9]{3}\\)[ ][0-9]{3}[ ]?[0-9]{4}");	
 	
 	//first string is the term string,int is the count
 	public HashMap<String,Integer> parseDoc(String doc_Text, String doc_Number)
@@ -85,17 +87,41 @@ public class Parser implements IParser{
 		sb2=parsePercent(termsHash, sb1);
 		sb1=parseDate(termsHash,sb2);
 		sb2=parsePrices(termsHash,sb1);
-		sb1=parseExpressions(termsHash,sb2);
-		sb2=parseKG(termsHash,sb1);		
-		sb1=parseNumbers(termsHash,sb2);
+		sb1=parsePhoneNumber(termsHash,sb2);
+		sb2=parseExpressions(termsHash,sb1);
+		sb1=parseKG(termsHash,sb2);				
+		sb2=parseNumbers(termsHash,sb1);
 
-		parseEndWords(termsHash,sb1);
+		parseEndWords(termsHash,sb2);
 
 		//printHash(termsHash);
 	    
 		return termsHash;
 	}
-
+	
+	StringBuffer parsePhoneNumber(HashMap<String,Integer> terms_Hash, StringBuffer doc_Text)
+	{
+		StringBuffer sb1 = new StringBuffer() ;
+		StringBuffer sb2 = new StringBuffer();
+		
+		Matcher matcher  = patternPhoneNumber.matcher(doc_Text);
+		while (matcher.find())
+		{
+			addToHash(terms_Hash,matcher.group());
+			matcher.appendReplacement(sb1, "");
+		}
+		matcher.appendTail(sb1);
+		
+		matcher  = patternPhoneNumber2.matcher(sb1);
+		while (matcher.find())
+		{
+			addToHash(terms_Hash,matcher.group());
+			matcher.appendReplacement(sb2, "");
+		}
+		matcher.appendTail(sb2);
+		
+		return sb2;
+	}
 
 	StringBuffer parseKG(HashMap<String,Integer> terms_Hash, StringBuffer doc_Text)
 	{
