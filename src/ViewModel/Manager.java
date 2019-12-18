@@ -121,7 +121,6 @@ public class Manager {
                 System.out.println("After one document");
 
             }
-            System.out.println("Done with one file" + file);
         }
         System.out.println("Im Done Here");
     }
