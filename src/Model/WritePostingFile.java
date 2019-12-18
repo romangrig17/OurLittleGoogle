@@ -19,6 +19,8 @@ public class WritePostingFile extends Thread  {
     HashMap<Integer,HashSet<String>> termsByHashCode;
     //HashMap<String, HashMap<String,Integer>> postingFile
 
+    private static final int AMOUNT_OF_POSTING_FILES = 2500;
+
     /**
      * init all params
      * @param pathToWrite - to where we want write
@@ -126,6 +128,7 @@ public class WritePostingFile extends Thread  {
                         infoOnTerm.append(docName).append("#").append(postingFile.get(termInPostingFileOfRam).get(docName)).append(",");
                     }
                     text.append(originalTerm).append(":").append(infoOnTerm).append("\n");
+                    //original term
                     hashOfTerms.remove(termInPostingFileOfRam);
                 }
                 else
@@ -153,6 +156,8 @@ public class WritePostingFile extends Thread  {
             return infoPostingFile;
         }catch (Exception e)
         {
+            StringBuilder temo = pathToWrite;
+            String t2 = nameOfPostingFile;
             e.toString();
         }
         return null;

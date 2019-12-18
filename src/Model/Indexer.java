@@ -33,17 +33,41 @@ public class Indexer {
         for (String term: listOfTerms.keySet())
         {
             //only for now
-            if (term.length() == 0)
+            if (term.length() == 0 || term.charAt(0) == '[' || term.charAt(0) == '.' || term.charAt(0) == '('
+                    || term.charAt(0) == ']' || term.charAt(0) == ')' || term.charAt(0) == ',' || term.charAt(0) == '"' ||
+                term.charAt(0) == '\'' || term.charAt(0) == '`' || term.charAt(0) == '_')
             {
                 continue;
             }
             //make all the term with upper letters if the first letter is upper
             String originalTerm = term;
             boolean ifTheWordIsWithUpperLetters = false;
-            if (originalTerm.charAt(0) >= 'A' && originalTerm.charAt(0) <= 'Z' && !(Pattern.matches("[_ .,-;'/\t]",originalTerm)))
+            if (originalTerm.charAt(0) >= 'A' && originalTerm.charAt(0) <= 'Z' && !(Pattern.matches("[ ]",originalTerm)))
             {
                 originalTerm = originalTerm.toUpperCase();
                 ifTheWordIsWithUpperLetters = true;
+            }
+            else if (originalTerm.charAt(0) >= 'a' && originalTerm.charAt(0) <= 'z' && !(Pattern.matches("[ ]",originalTerm)))
+            {
+                originalTerm = originalTerm.toLowerCase();
+            }
+            else if (originalTerm.charAt(0) >= '0' && originalTerm.charAt(0) <= '9' && originalTerm.contains("-"))
+            {
+                //number - word
+                int indexOfChar = originalTerm.indexOf('-');
+                if (originalTerm.charAt(indexOfChar +1) >= 'A' || originalTerm.charAt(indexOfChar +1) <= 'Z')
+                {
+                    originalTerm = originalTerm.toUpperCase();
+                }
+                else
+                {
+                    originalTerm = originalTerm.toLowerCase();
+                }
+            }
+            else if (originalTerm.contains(" ") && (Pattern.matches("[0-9]",originalTerm)))
+            {
+                //number!
+                System.out.println(originalTerm);
             }
 
 
@@ -115,7 +139,7 @@ public class Indexer {
                  * we will check first if the word is with small letters - and if it does we will change the dictionary and posting to small letters!
                  * we will add this word - (with the small letters) to dictionary and check if it is the same document
                  */
-                String[] splitedDic = dictionary.get(originalTerm).split(",");
+                String[] splitedDic = dictionary.get(originalTerm.toUpperCase()).split(",");
                 if(ifTheWordIsWithUpperLetters)
                 {
                     //if the word in dictionary was with upper letters and we got with upper letters too - new doc!
