@@ -1,4 +1,19 @@
+package Model;
 
+import java.time.LocalTime;
+import java.util.regex.Pattern;
+
+import javafx.util.Pair;
+
+import java.util.HashMap;
+import java.util.regex.Matcher;
+
+enum types
+{
+	UNDEFINED,
+	NUMBER_SMALLER_THAN_1K, // 0<=x<1K
+	NUMBER_1K_TO_1M, // 1K<=x<1M
+	NUMBER_1M_TO_1B, // 1M<=x<1B
 	NUMBER_GREATER_THAN_1B, //x>=1B
 	NUMBER_ENDS_WITH_$,
 	NUMBER_ENDS_WITH_SIGN_PERCENTAGE,// 123%
@@ -601,7 +616,7 @@ public class Parser implements IParser{
 			{
 				ret=types.NUMBER_1M_TO_1B;
 			}
-			else 
+			else
 			{
 				ret=types.NUMBER_GREATER_THAN_1B;
 			}
