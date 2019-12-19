@@ -5,15 +5,23 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 public class StopWords {
 
     private HashSet<String> allStopWords;
 
-    public StopWords(String path)
-    {
+    public StopWords(String path) {
+        String pathOfStopWords = "";
+        File directory = new File(path);
+        String[] files = directory.list();
+        for (String file : files) {
+            if (!(new File(path + "\\" + file).isDirectory())) {
+                pathOfStopWords = path + "\\" + file;
+            }
+        }
         allStopWords = new HashSet<>();
-        File file = new File(path);
+        File file = new File(pathOfStopWords);
         try {
             String st = "";
             BufferedReader br = new BufferedReader(new FileReader(file));
@@ -22,18 +30,23 @@ public class StopWords {
                 allStopWords.add(st);
             }
             br.close();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("problem with the reading from file!! in: " + file.getPath());
         }
     }
 
-    public void removeStopWords(HashMap<String,Integer> listOfTerms)
-    {
-        for (String stopWord : allStopWords)
-        {
-            listOfTerms.remove(stopWord);
+    public HashMap<String, Integer> removeStopWords(HashMap<String, Integer> listOfTerms) {
+        HashMap<String, Integer> listOfTermsWithOutStopWords = new HashMap<>();
+        for (String term : listOfTerms.keySet()) {
+            if (!allStopWords.contains(term.toLowerCase())) {
+                listOfTermsWithOutStopWords.put(term, listOfTerms.get(term));
+            }
         }
+        return listOfTermsWithOutStopWords;
+//        for (String stopWord : allStopWords)
+//        {
+//            listOfTerms.remove(stopWord);
+//        }
     }
 
 }

@@ -1,7 +1,6 @@
 package Model;
 
 import java.util.*;
-import java.util.regex.Pattern;
 
 public class Indexer {
 
@@ -11,7 +10,7 @@ public class Indexer {
      * second string - "how many times appeared in the Corpus, in how many docs it was,the last doc where its appeared"
      * [term ; _ , _ , _ ]
      */
-    private HashMap<String, String> dictionary;
+    HashMap<String, String> dictionary;
 
     /**
      * first string - term
@@ -25,7 +24,6 @@ public class Indexer {
     public Indexer() {
         this.dictionary = new HashMap<>();
         this.postingFile = new HashMap<>();
-        //this.wordsToUpdateFromUpperToLower = new HashSet<>();
     }
 
     public HashMap<String, HashMap<String,Integer>> getPostingFileFromListOfTerms(HashMap<String, Integer> listOfTerms, String docName)
@@ -34,11 +32,11 @@ public class Indexer {
         {
             //only for now
             //check what we got from parser
-            if (term.length() == 0 || term.charAt(0) == '[' || term.charAt(0) == '.' || term.charAt(0) == '('
+            if (term.length() == 0|| term.charAt(0) == '[' || term.charAt(0) == '.' || term.charAt(0) == '('
                     || term.charAt(0) == ']' || term.charAt(0) == ')' || term.charAt(0) == ',' || term.charAt(0) == '"' ||
                     term.charAt(0) == '\'' || term.charAt(0) == '`' || term.charAt(0) == '_' || term.charAt(0) == ' ')
             {
-                System.out.println(term);
+                //System.out.println(term);
                 continue;
             }
             //make all the term with upper letters if the first letter is upper
@@ -142,7 +140,6 @@ public class Indexer {
                     Integer updateNumberOfTimesInAllCorpus = Integer.parseInt(splitedDic[0]) + listOfTerms.get(term);
                     Integer updateNumberOfDocuments = (Integer.parseInt(splitedDic[1])) + 1;
                     dictionary.put(originalTerm,updateNumberOfTimesInAllCorpus + "," + updateNumberOfDocuments + "," +docName);
-
                     if (postingFile.containsKey(originalTerm))
                     {
                         updatePostingFileIfNewFile(originalTerm,docName,listOfTerms.get(term));
@@ -205,6 +202,9 @@ public class Indexer {
     }
 
 
+
+
+
     //<editor-fold des="adding to Dictionary>
     /**
      * adding new term to dictionary and after that to posting file
@@ -263,7 +263,7 @@ public class Indexer {
 
     //</editor-fold>
 
-    //<editor-fold dex="initialization the posting file">
+    //<editor-fold des="initialization the posting file">
     /**
      * initialization posting file to free the memory
      */
@@ -273,7 +273,7 @@ public class Indexer {
     }
     //</editor-fold>
 
-    //<editor-fold dex="Getters">
+    //<editor-fold des="Getters">
 
     /**
      * @return - Dictionary
@@ -306,5 +306,9 @@ public class Indexer {
     {
         return postingFile.size();
     }
+    //</editor-fold>
+
+    //<editor-fold des="Setters"
+
     //</editor-fold>
 }

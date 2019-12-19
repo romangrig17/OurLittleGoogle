@@ -74,10 +74,7 @@ public class Parser implements IParser{
 	Pattern patternPhoneNumber= Pattern.compile("[0-9]{3}(-| )[0-9]{3}( )?[0-9]{4}");
 	Pattern patternPhoneNumber2= Pattern.compile("\\([0-9]{3}\\)[ ]?[0-9]{3}[ ]?[0-9]{4}");	
 	
-
-	//This function parse the input doc_text.
-	//The output is a hashmap of all the parsed words:
-	//first string is the term,int is the count.
+	//first string is the term string,int is the count
 	public HashMap<String,Integer> parseDoc(String doc_Text, String doc_Number)
 	{
 		HashMap<String,Integer> termsHash= new HashMap<>();
@@ -94,13 +91,11 @@ public class Parser implements IParser{
 
 		parseEndWords(termsHash,sb2);
 
-		//printHash(termsHash); for checking you can print
+		//printHash(termsHash);
 	    
 		return termsHash;
 	}
 	
-	//parsePhoneNumber- input: stringBuffer of the text and hashMap to update
-	//output:the new string buffer without the matches+ updates the the hash with the matched numbers
 	StringBuffer parsePhoneNumber(HashMap<String,Integer> terms_Hash, StringBuffer doc_Text)
 	{
 		StringBuffer sb1 = new StringBuffer() ;
@@ -125,8 +120,6 @@ public class Parser implements IParser{
 		return sb2;
 	}
 
-	//parseKG- input: stringBuffer of the text and hashMap to update
-	//output:the new string buffer without the matches+ updates the the hash with the matched kilograms
 	StringBuffer parseKG(HashMap<String,Integer> terms_Hash, StringBuffer doc_Text)
 	{
 		StringBuffer sb1 = new StringBuffer() ;
@@ -140,8 +133,6 @@ public class Parser implements IParser{
 		return sb1;
 	}
 	
-	//parseNames- input: stringBuffer of the text and hashMap to update
-	//no output, just updates the the hash with the matched names and entities 
 	void parseNames(HashMap<String,Integer> terms_Hash, StringBuffer doc_Text)
 	{
 		StringBuffer sb1 = new StringBuffer() ;
@@ -152,9 +143,7 @@ public class Parser implements IParser{
 		}
 		matcher.appendTail(sb1);
 	}
-
-	//parseEndWords- input: stringBuffer of the text and hashMap to update
-	//no output, just updates the the hash with the matched names and entities 
+	
 	void parseEndWords(HashMap<String,Integer> terms_Hash, StringBuffer doc_Text)
 	{
 		StringBuffer sb1 = new StringBuffer() ;
@@ -177,18 +166,15 @@ public class Parser implements IParser{
         }
 	}
 
-	//printHash- input: hashMap
-	//printout the hash values
-	void printHash(HashMap<String,Integer> terms_Hash)
-	{
-		for (String term: terms_Hash.keySet()){
-			String key = term.toString();
-			System.out.println("term is: "+key+" value is :"+terms_Hash.get(key));
-		}
-	}
+//	void printHash(HashMap<String,Integer> terms_Hash)
+//	{
+//		for (String term: terms_Hash.keySet()){
+//			String key = term.toString();
+//			//System.out.println("term is: "+key+" value is :"+terms_Hash.get(key));
+//		}
+//	}
 
-	//parseExpressions- input: stringBuffer of the text and hashMap to update
-	//output: the new text without the matches+updates the the hash with the matched expressions 
+
 	StringBuffer parseExpressions(HashMap<String,Integer> terms_Hash, StringBuffer doc_Text)
 	{
 		StringBuffer sb1 = new StringBuffer();
@@ -249,8 +235,7 @@ public class Parser implements IParser{
 		return sb2;
 	}
 
-	//addpatternWordNumberToHash- input: the matched term and hashMap to update
-	//output: add the match to the hash according to the instruction
+
 	private void addpatternWordNumberToHash(HashMap<String, Integer> terms_Hash, String match)
 	{
 		int idx=match.indexOf("-");
@@ -258,13 +243,10 @@ public class Parser implements IParser{
 		addToHash(terms_Hash,match);	
 		if( idx!=(-1) )
 		{
-			addToHash(terms_Hash,match.substring(0,idx-1).toString());
 			addToHash(terms_Hash,match.substring(idx+1,match.length()).toString());
 		}
 	}
 
-	//addpatternNumberNumberToHash- input: the matched term and hashMap to update
-	//output: add the match to the hash according to the instruction
 	private void addpatternNumberNumberToHash(HashMap<String, Integer> terms_Hash, String match)
 	{
 		int idx=match.indexOf("-");
@@ -276,9 +258,7 @@ public class Parser implements IParser{
 			addToHash(terms_Hash,match.substring(idx+1,match.length()).toString());
 		}
 	}
-	
-	//addpatternNumberWordToHash- input: the matched term and hashMap to update
-	//output: add the match to the hash according to the instruction
+
 	private void addpatternNumberWordToHash(HashMap<String, Integer> terms_Hash, String match) 
 	{
 		int idx=match.indexOf("-");
@@ -290,8 +270,6 @@ public class Parser implements IParser{
 		}
 	}
 
-	//parseNumbers: input- hash and doc_text
-	//output: add the matched numbers to the hash table and returns the new text without the matches
 	StringBuffer parseNumbers(HashMap<String,Integer>terms_Hash, StringBuffer doc_Text)
 	{
 
@@ -354,29 +332,19 @@ public class Parser implements IParser{
 		return sb2;
 	}
 
-	//addpatternNumbersThousandToHash- input: the matched term and hashMap to update
-	//output: add the match to the hash according to the instruction
 	void addpatternNumbersThousandToHash(HashMap<String,Integer> termsHash,String match )
 	{
 		addToHash(termsHash,match.subSequence(1,match.length()-"Thousand".length()-1).toString()+"K");
 	}
-	
-	//addpatternNumbersMillionToHash- input: the matched term and hashMap to update
-	//output: add the match to the hash according to the instruction
 	void addpatternNumbersMillionToHash(HashMap<String,Integer> termsHash,String match )
 	{
 		addToHash(termsHash,match.subSequence(1,match.length()-"Million".length()-1).toString()+"M");
 	}
-	
-	//addpatternNumbersBillionToHash- input: the matched term and hashMap to update
-	//output: add the match to the hash according to the instruction
 	void addpatternNumbersBillionToHash(HashMap<String,Integer> termsHash, String match )
 	{
 		addToHash(termsHash,match.subSequence(1,match.length()-"Billion".length()-1).toString()+"B");
 	}
 
-	//addpatternNumbersToHash- input: the matched term and hashMap to update
-	//output: add the match to the hash according to the instruction
 	void addpatternNumbersToHash(HashMap<String,Integer> termsHash,String match )
 	{
 		match= upToThreeNubersAfterDot(match);
@@ -406,16 +374,12 @@ public class Parser implements IParser{
 		}
 	}
 
-	//addpatternNumbersCommasToHash- input: the matched term and hashMap to update
-	//output: add the match to the hash according to the instruction
 	void addpatternNumbersCommasToHash(HashMap<String,Integer> termsHash,String match )
 	{
 		match=removeComma(match);
 		addpatternNumbersToHash(termsHash,match);
 	}
 
-	//parsePrices- input: stringBuffer of the text and hashMap to update
-	//output:the new string buffer without the matches+ updates the the hash with the matched prices
 	StringBuffer parsePrices(HashMap<String,Integer> terms_Hash, StringBuffer doc_Text)
 	{
 
@@ -513,23 +477,17 @@ public class Parser implements IParser{
 		return sb2;
 	}
 
-	//addpatternDollarSignMillionToHash- input: the matched term and hashMap to update
-	//output: add the match to the hash according to the instruction($price million -> price M Dollars)
-	void addpatternDollarSignMillionToHash(HashMap<String,Integer> termsHash,String match )
+	void addpatternDollarSignMillionToHash(HashMap<String,Integer> termsHash,String match )//$price million -> price M Dollars
 	{
 		addToHash(termsHash,match.subSequence(1,match.length()-"million".length()-1).toString()+" M Dollars");
 	}
 
-	//addpatternDollarSignBillionToHash- input: input: the matched term and hashMap to update
-	//output: add the match to the hash according to the instruction ($price billion ->price M Dollars)
-	void addpatternDollarSignBillionToHash(HashMap<String,Integer> termsHash,String match )
+	void addpatternDollarSignBillionToHash(HashMap<String,Integer> termsHash,String match )//$price billion ->price M Dollars
 	{
 		addToHash(termsHash,match.subSequence(1,match.length()-"billion".length()-1).toString()+"000"+" M Dollars");;
 	}
 
-	//addpatternDollarSignToHash- input: input: the matched term and hashMap to update
-	//output: add the match to the hash according to the instruction($price -> above 1M- save as price M Dollars, else save as price Dollars)
-	void addpatternDollarSignToHash(HashMap<String,Integer> termsHash,String match )
+	void addpatternDollarSignToHash(HashMap<String,Integer> termsHash,String match )//$price -> above 1M- save as price M Dollars, else save as price Dollars
 	{
 		match= upToThreeNubersAfterDot(match.subSequence(1,match.length()).toString());
 		match=removeComma(match);
@@ -544,16 +502,12 @@ public class Parser implements IParser{
 		}
 	}
 
-	//addpatternFractionDollarToHash- input: the matched term and hashMap to update
-	//output: add the match to the hash according to the instruction(Price fraction Dollars-> save the same)
-	void addpatternFractionDollarToHash(HashMap<String,Integer> termsHash,String match )
+	void addpatternFractionDollarToHash(HashMap<String,Integer> termsHash,String match )//Price fraction Dollars-> save the same
 	{
 		addToHash(termsHash,match);
 	}
 
-	//addpatternDollarToHash- input: the matched term and hashMap to update
-	//output: add the match to the hash according to the instruction (Price Dollars-> above 1M- save as price M Dollars, else save as price Dollars)
-	void addpatternDollarToHash(HashMap<String,Integer> termsHash,String match )
+	void addpatternDollarToHash(HashMap<String,Integer> termsHash,String match )//Price Dollars-> above 1M- save as price M Dollars, else save as price Dollars
 	{
 		match= upToThreeNubersAfterDot(match.subSequence(0,match.length()-"Dollars".length()-1).toString());
 		match=removeComma(match);
@@ -568,9 +522,7 @@ public class Parser implements IParser{
 		}
 	}
 
-	//addpatternMDollarToHash- input: the matched term and hashMap to update
-	//output: add the match to the hash according to the instruction(Price m Dollars --> Price M Dollars)
-	void addpatternMDollarToHash(HashMap<String,Integer> termsHash,String match )
+	void addpatternMDollarToHash(HashMap<String,Integer> termsHash,String match )//Price m Dollars --> Price M Dollars
 	{
 		int idxspace=match.indexOf(" ");
 		int idxm=match.indexOf("m");
@@ -587,9 +539,7 @@ public class Parser implements IParser{
 		}
 	}
 
-	//addpatternBnDollarToHash- input: the matched term and hashMap to update
-	//output: add the match to the hash according to the instruction(Price bn Dollars)
-	void addpatternBnDollarToHash(HashMap<String,Integer> termsHash,String match )
+	void addpatternBnDollarToHash(HashMap<String,Integer> termsHash,String match )//Price bn Dollars
 	{
 		match=removeComma(match);
 		int idxspace=match.indexOf(" ");
@@ -606,9 +556,7 @@ public class Parser implements IParser{
 		}
 	}
 
-	//addpatternBillionUSDollarToHash- input: the matched term and hashMap to update
-	//output: add the match to the hash according to the instruction(Price billion U.S. dollars)
-	void addpatternBillionUSDollarToHash(HashMap<String,Integer> termsHash,String match )
+	void addpatternBillionUSDollarToHash(HashMap<String,Integer> termsHash,String match )//Price billion U.S. dollars
 	{
 		match=removeComma(match);
 		int idxspace=match.indexOf(" ");
@@ -616,9 +564,7 @@ public class Parser implements IParser{
 		addToHash(termsHash,match.substring(0,idxspace)+"000 M Dollars");
 	}
 
-	//addpatternMillionUSDollarToHash- input: the matched term and hashMap to update
-	//output: add the match to the hash according to the instruction(Price million U.S. dollars)
-	void addpatternMillionUSDollarToHash(HashMap<String,Integer>termsHash, String match )
+	void addpatternMillionUSDollarToHash(HashMap<String,Integer>termsHash, String match )//Price million U.S. dollars
 	{
 		match=removeComma(match);
 		int idxspace=match.indexOf(" ");
@@ -626,9 +572,7 @@ public class Parser implements IParser{
 		addToHash(termsHash,match.substring(0,idxspace)+" M Dollars");
 	}
 
-	//addpatternTrillionUSDollarToHash- input: the matched term and hashMap to update
-	//output: add the match to the hash according to the instruction(Price trillion U.S. dollars)
-	void addpatternTrillionUSDollarToHash(HashMap<String,Integer> termsHash, String match )
+	void addpatternTrillionUSDollarToHash(HashMap<String,Integer> termsHash, String match )//Price trillion U.S. dollars
 	{
 		match=removeComma(match);
 		int idxspace=match.indexOf(" ");
