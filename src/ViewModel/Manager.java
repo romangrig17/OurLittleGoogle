@@ -62,6 +62,7 @@ public class Manager {
         // create a pool of threads, 5 max jobs will execute in parallel
         ExecutorService threadPool = Executors.newFixedThreadPool(5);
         //run on all files
+        //long start = System.currentTimeMillis();
         for (String file : allFiles) {
             HashMap<String, StringBuilder> allTextsFromTheFile = fileReader.getTextsFromTheFile(new File(file));
             Parser parser = new Parser();
@@ -124,16 +125,18 @@ public class Manager {
             writePostingFile.putPostingFile(indexer.getPostingFile());
             threadPool.execute(writePostingFile);
         }
+        // once you've submitted your last job to the service it should be shut down
         threadPool.shutdown();
         while (!threadPool.isTerminated()) {}
 
         //writing all the entity
         writePostingFile.writeTheEntity(indexer.getDictionary());
-
+//        long elapsedTime = System.currentTimeMillis() - start;
+//        double elapsedTimeD = (double) elapsedTime;
+//        System.out.println("The time of program: " + (elapsedTimeD/60000) + " Min");
         System.out.println("Im Done Here");
         System.out.println("The amount of unique terms: " + indexer.getDictionary().size());
         sortByTerms();
-        // once you've submitted your last job to the service it should be shut down
 
     }
 
