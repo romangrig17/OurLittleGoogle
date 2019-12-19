@@ -17,7 +17,8 @@ public class WritePostingFile extends Thread {
     HashSet<String> namesOfPostingFile;
 
     //hash map for each document gets semaphore
-    HashMap<String, Semaphore> semaphoreHashMap;
+
+    //ArrayList<Semaphore> arrayList;
 
     //posting file for each new thread
     private HashMap<String, HashMap<String, Integer>> postingFile;
@@ -26,7 +27,16 @@ public class WritePostingFile extends Thread {
     HashMap<Integer, HashSet<String>> termsByHashCode;
 
     //amount of the posting files we write
-    private static final int AMOUNT_OF_POSTING_FILES = 2500;
+    private static final int AMOUNT_OF_POSTING_FILES = 1500;
+
+    private static HashMap<String, Semaphore> semaphoreHashMap;
+    static {
+        semaphoreHashMap = new HashMap<>();
+        for (int i=0 ; i<AMOUNT_OF_POSTING_FILES; i++)
+        {
+            semaphoreHashMap.put(Integer.toString(i), new Semaphore(1));
+        }
+    }
 
     /**
      * initializing all params
@@ -37,10 +47,6 @@ public class WritePostingFile extends Thread {
         this.pathToWrite = pathToWrite;
         this.h_Entity = new HashMap<>();
         this.namesOfPostingFile = new HashSet<>();
-        semaphoreHashMap = new HashMap<>();
-        for (int i = 0; i < AMOUNT_OF_POSTING_FILES; i++) {
-            semaphoreHashMap.put(Integer.toString(i), new Semaphore(1));
-        }
     }
 
     /**
@@ -59,39 +65,42 @@ public class WritePostingFile extends Thread {
 
 
     public boolean toWrite(HashMap<String, HashMap<String, Integer>> postingFile) {
-        //goes on all terms
-        /**
-         * TODO: check each term if he got the same at Dic in low letters
-         */
+        //gets the terms that need to be written by them hashcode
         getPackages(postingFile, AMOUNT_OF_POSTING_FILES);
 
         for (Integer termHashCode : termsByHashCode.keySet()) {
-            if (namesOfPostingFile.contains(termHashCode.toString())) {
-                //we will read all the text in the file - each line we will put to ArrayList
-                //0 - text , 1- path
-                StringBuilder[] infoPostingFile = getTextFromFile(pathToWrite, termHashCode.toString(), termsByHashCode.get(termHashCode));
-                if (infoPostingFile == null)
-                    System.out.println("Problem to read from text in: " + termHashCode);
-                StringBuilder updatedText = infoPostingFile[0];
-                updateThePostingFile(infoPostingFile[1], updatedText, termHashCode.toString());
-
-            } else {
-                // if the term is Entity
-                StringBuilder substance = new StringBuilder();
-                for (String term : termsByHashCode.get(termHashCode)) {
-                    //if its not Entity and that is a new posting file
-
-                    //add to hash set that we have a file like this
-                    namesOfPostingFile.add(termHashCode.toString());
-                    //adding the term to line
-                    substance.append(term).append(":");
-                    //adding all the posting to line
-                    for (String docName : postingFile.get(term).keySet()) {
-                        substance = substance.append(docName).append("#").append(postingFile.get(term).get(docName)).append(",");
+            try{
+                if (namesOfPostingFile.contains(termHashCode.toString())) {
+                    //we will read all the text in the file - each line we will put to ArrayList
+                    //0 - text , 1- path
+                    StringBuilder[] infoPostingFile = getTextFromFile(pathToWrite, termHashCode.toString(), termsByHashCode.get(termHashCode));
+                    if (infoPostingFile == null) {
+                        System.out.println("Problem to read from text in: " + termHashCode);
+                        continue;
                     }
-                    substance.append("\n");
+                    StringBuilder updatedText = infoPostingFile[0];
+                    updateThePostingFile(infoPostingFile[1], updatedText, termHashCode.toString());
+
+                } else {
+                    StringBuilder substance = new StringBuilder();
+                    for (String term : termsByHashCode.get(termHashCode)) {
+                        //if its not Entity and that is a new posting file
+
+                        //add to hash set that we have a file like this
+                        namesOfPostingFile.add(termHashCode.toString());
+                        //adding the term to line
+                        substance.append(term).append(":");
+                        //adding all the posting to line
+                        for (String docName : postingFile.get(term).keySet()) {
+                            substance = substance.append(docName).append("#").append(postingFile.get(term).get(docName)).append(",");
+                        }
+                        substance.append("\n");
+                    }
+                    writeToDiskNewTextFile(pathToWrite, termHashCode.toString(), substance.toString());
                 }
-                writeToDiskNewTextFile(pathToWrite, termHashCode.toString(), substance.toString());
+            }catch (Exception e)
+            {
+                e.toString();
             }
         }
 
@@ -102,7 +111,7 @@ public class WritePostingFile extends Thread {
     private StringBuilder[] getTextFromFile(StringBuilder pathToWrite, String nameOfPostingFile, HashSet<String> hashOfTerms) {
         try {
             semaphoreHashMap.get(nameOfPostingFile).acquire();
-            StringBuilder fullPath = (new StringBuilder(pathToWrite).append("\\").append(nameOfPostingFile).append(".txt"));
+            StringBuilder fullPath = new StringBuilder(pathToWrite).append("\\").append(nameOfPostingFile).append(".txt");
             File file = new File(fullPath.toString());
             BufferedReader br = new BufferedReader(new FileReader(file));
             String line;
@@ -111,24 +120,31 @@ public class WritePostingFile extends Thread {
                 //if the term is already in the posting file - we will update the line and put the new to
                 String[] lineSplit = line.split(":");
                 if ((hashOfTerms.contains(lineSplit[0].toUpperCase())) || (hashOfTerms.contains(lineSplit[0].toLowerCase()))) {
-                    String originalTerm = lineSplit[0];
-                    String termInPostingFileOfRam = lineSplit[0];
-                    if (hashOfTerms.contains(lineSplit[0].toLowerCase())) {
-                        termInPostingFileOfRam = lineSplit[0].toLowerCase();
-                        originalTerm = termInPostingFileOfRam;
-                    }
-                    //TODO: check if new term is with low or upper case and this what to do - its cannot be the same doc!!
-                    //need to change the term and update the line
-                    String originalTermInThePostingFileDisk = lineSplit[0];
-                    StringBuilder infoOnTerm = new StringBuilder(lineSplit[1]);
-                    //update the all line
-                    Set<String> set_DocsName = postingFile.get(termInPostingFileOfRam).keySet();
-                    for (String docName : set_DocsName) {
-                        infoOnTerm.append(docName).append("#").append(postingFile.get(termInPostingFileOfRam).get(docName)).append(",");
-                    }
-                    text.append(originalTerm).append(":").append(infoOnTerm).append("\n");
-                    //original term
-                    hashOfTerms.remove(termInPostingFileOfRam);
+                    //if we got our term like in the line with upper letters
+                   if ((hashOfTerms.contains(lineSplit[0].toUpperCase())))
+                   {
+                       String termInPostingFile = lineSplit[0].toUpperCase();
+                       text.append(lineSplit[0]).append(":").append(lineSplit[1]);
+                       Set<String> set_DocsName = postingFile.get(termInPostingFile).keySet();
+                       for (String docName : set_DocsName) {
+                           text.append(docName).append("#").append(postingFile.get(termInPostingFile).get(docName)).append(",");
+                       }
+                       text.append("\n");
+                       hashOfTerms.remove(lineSplit[0].toUpperCase());
+                   }
+                   //if we got our term like in the line with lower letters
+                   else
+                   {
+                       String termInPostingFile = lineSplit[0].toLowerCase();
+                       text.append(termInPostingFile).append(":").append(lineSplit[1]);
+                       Set<String> set_DocsName = postingFile.get(termInPostingFile).keySet();
+                       for (String docName : set_DocsName) {
+                           text.append(docName).append("#").append(postingFile.get(termInPostingFile).get(docName)).append(",");
+                       }
+                       text.append("\n");
+                       hashOfTerms.remove(lineSplit[0].toLowerCase());
+                   }
+
                 } else {
                     text.append(line).append("\n");
                 }
@@ -144,6 +160,7 @@ public class WritePostingFile extends Thread {
                 }
                 //not founded we will add him to end
             }
+            br.close();
             StringBuilder[] infoPostingFile = new StringBuilder[2];
             infoPostingFile[0] = text;
             infoPostingFile[1] = fullPath;
@@ -156,52 +173,40 @@ public class WritePostingFile extends Thread {
             StringBuilder tempForDebugger1 = pathToWrite;
             String tempForDebugger2 = nameOfPostingFile;
             e.toString();
+            return null;
         }
-        return null;
     }
 
     private void updateThePostingFile(StringBuilder path, StringBuilder textInFile, String termHashCode) {
         /**
          * TODO:check what faster, update or delete and write new
          */
-        //file.delete();
-        //BufferedWriter out = new BufferedWriter(new FileWriter(file), 32768);
         try {
             semaphoreHashMap.get(termHashCode).acquire();
             File file = new File(path.toString());
-            //BufferedWriter out = new BufferedWriter(new FileWriter(file), 32768);
-            //out.write(textInFile.toString());
-            //out.close();
-            //file.createNewFile();
-            //we can delete what exist and write new
-
             FileWriter writer = new FileWriter(file);
             writer.write(textInFile.toString());
             writer.close();
             semaphoreHashMap.get(termHashCode).release();
         } catch (Exception e) {
-            System.out.println("Problem To Update The File: path: " + path + ", The Text: " + textInFile);
+            System.out.println("Problem To Update The File: path12: " + path + ", The Text: " + textInFile);
         }
     }
 
     private void writeToDiskNewTextFile(StringBuilder path, String textName, String textInFile) {
-
         try {
             semaphoreHashMap.get(textName).acquire();
             StringBuilder pathToWrite = new StringBuilder(path).append("\\").append(textName).append(".txt");
             File file = new File(pathToWrite.toString());
             //Create the file
             file.createNewFile();
-//            BufferedWriter out = new BufferedWriter(new FileWriter(file), 32768);
-//            out.write(textInFile.toString());
-//            out.close();
-
             FileWriter writer = new FileWriter(file);
             writer.write(textInFile);
             writer.close();
+
             semaphoreHashMap.get(textName).release();
         } catch (Exception e) {
-            System.out.println("Problem To Write The File: File Name: " + textName + ", The Text: " + textInFile);
+            System.out.println("Problem To Write The File: File Name13: " + textName + ", The Text: " + textInFile);
         }
     }
 
@@ -214,7 +219,7 @@ public class WritePostingFile extends Thread {
      * @param postingFile - posting file that we have
      * @param term        - the NTT
      */
-    private void addNewEntity(HashMap<String, HashMap<String, Integer>> postingFile, String term) {
+    synchronized private void addNewEntity(HashMap<String, HashMap<String, Integer>> postingFile, String term) {
         Set<String> set_DocsName = postingFile.get(term).keySet();
         //if we got the entity
         if (h_Entity.containsKey(term)) {
@@ -233,11 +238,11 @@ public class WritePostingFile extends Thread {
     }
 
 
-    public void writeTheEntity() {
+    public void writeTheEntity(HashMap<String,String> dictionary) {
         if (h_Entity.size() < 1) {
             return;
         }
-        StringBuilder entityFile = getStringForEntityFile();
+        StringBuilder entityFile = getStringForEntityFile(dictionary);
         try {
             String pathToWriteTheEntity = pathToWrite + "\\Entity.txt";
             File file = new File(pathToWriteTheEntity);
@@ -252,7 +257,7 @@ public class WritePostingFile extends Thread {
     }
 
 
-    private StringBuilder getStringForEntityFile() {
+    private StringBuilder getStringForEntityFile(HashMap<String,String> dictionary) {
         StringBuilder entityFile = new StringBuilder();
         //delete each entity that appears only one time
         for (String entity : h_Entity.keySet()) {
@@ -262,6 +267,10 @@ public class WritePostingFile extends Thread {
                     entityFile.append(infoOnEntity);
                 }
                 entityFile.append("\n");
+            }
+            else
+            {
+                dictionary.remove(entity);
             }
         }
         return entityFile;
@@ -291,5 +300,10 @@ public class WritePostingFile extends Thread {
                 termsByHashCode.put(termHashCode, temp);
             }
         }
+    }
+
+    public void changePath(StringBuilder newPath)
+    {
+        this.pathToWrite = newPath;
     }
 }

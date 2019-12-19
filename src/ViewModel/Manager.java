@@ -20,11 +20,11 @@ public class Manager {
 
 
     ArrayList<String> allFiles;
-    StringBuilder sortedDictionary;
+    String[][] sortedDictionary;
     StringBuilder docsInfo;
     int counterOfDocs = 0;
 
-    private static final int AMOUNT_OF_DOCS_IN_POSTING_FILE = 7500;
+    private static final int AMOUNT_OF_DOCS_IN_POSTING_FILE = 15000;
 
     public Manager() {
         super();
@@ -40,11 +40,25 @@ public class Manager {
         fileReader = new ReadFile(pathForCorpus);
         allFiles = fileReader.getAllFiles();
         indexer = new Indexer();
-        writePostingFile = new WritePostingFile(new StringBuilder(pathForPostingFile));
+        if (stemming)
+        {
+            pathForPostingFile = pathForPostingFile +"\\With Stemming";
+            new File(pathForPostingFile).mkdirs();
+
+            //file.mkdir();
+            writePostingFile = new WritePostingFile(new StringBuilder(pathForPostingFile));
+        }
+        else
+        {
+            pathForPostingFile = pathForPostingFile +"\\Without Stemming";
+            File file = new File(pathForPostingFile);
+            file.mkdir();
+            writePostingFile = new WritePostingFile(new StringBuilder(pathForPostingFile));
+        }
         /**
          * TODO:Get path for Stop Words
          */
-        StopWords stopWords = new StopWords("C:\\My Little Project\\05 stop_words.txt");
+        StopWords stopWords = new StopWords(pathForCorpus);
         // create a pool of threads, 5 max jobs will execute in parallel
         ExecutorService threadPool = Executors.newFixedThreadPool(5);
         //run on all files
@@ -64,7 +78,7 @@ public class Manager {
                 /**
                  * remove the stop words from the list of terms which we got from parser
                  */
-                stopWords.removeStopWords(listOfTerms);
+                listOfTerms = stopWords.removeStopWords(listOfTerms);
 
                 /**
                  * here is the stemming
@@ -95,26 +109,32 @@ public class Manager {
                     counterOfDocs = 0;
                     writePostingFile.putPostingFile(indexer.getPostingFile());
                     threadPool.execute(writePostingFile);
+                    //System.out.println(Thread.activeCount());
+                    //writePostingFile.run();
                     indexer.initNewPostingFile();
                 }
                 //System.out.println("After one document");
             }
         }
+        //threadPool.shutdown();
+        //while (!threadPool.isTerminated()) {}
         //if there is more unwritten files
         if (counterOfDocs > 0)
         {
             writePostingFile.putPostingFile(indexer.getPostingFile());
-            writePostingFile.run();
+            threadPool.execute(writePostingFile);
         }
+        threadPool.shutdown();
+        while (!threadPool.isTerminated()) {}
 
         //writing all the entity
-        writePostingFile.writeTheEntity();
+        writePostingFile.writeTheEntity(indexer.getDictionary());
 
         System.out.println("Im Done Here");
         System.out.println("The amount of unique terms: " + indexer.getDictionary().size());
+        sortByTerms();
         // once you've submitted your last job to the service it should be shut down
-        threadPool.shutdown();
-        while (!threadPool.isTerminated()) {}
+
     }
 
     //<editor-fold des="Help Function For GUI>
@@ -131,14 +151,14 @@ public class Manager {
         }
     }
 
-    public StringBuilder getSortedDictionary() {
+    public String[][] getSortedDictionary() {
         sortByTerms();
         return sortedDictionary;
     }
 
     public void sortByTerms() {
         HashMap<String, String> dictionary = indexer.getDictionary();
-        sortedDictionary = new StringBuilder();
+        sortedDictionary = new String[indexer.getSizeOfDictionary()][2];
         // TreeMap to store values of HashMap
         TreeMap<String, String> sorted = new TreeMap<>();
 
@@ -146,9 +166,14 @@ public class Manager {
         sorted.putAll(dictionary);
 
         // Display the TreeMap which is naturally sorted
+        int i=0;
         for (HashMap.Entry<String, String> entry : sorted.entrySet()) {
-            sortedDictionary.append("Term: ").append(entry.getKey()).append("Amount of performances").append(entry.getValue().split(",")[0]).append("\n");
+
+            sortedDictionary[i][0] = entry.getKey();
+            sortedDictionary[i][1] = entry.getValue();
+            i++;
         }
+        //System.out.println(sortedDictionary);
     }
 
     //</editor-fold>

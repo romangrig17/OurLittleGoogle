@@ -45,7 +45,6 @@ public class ReadFile implements IReadFile {
         String[] docsInDir = directory.list();
 
         for (int i = 0; i < docsInDir.length; i++) {
-            //File file = new File(dirName + "\\" + docsInDir[i]);
             allFiles.add(dirName + "\\" + docsInDir[i]);
         }
     }
@@ -66,11 +65,9 @@ public class ReadFile implements IReadFile {
 
                 if (st.contains("<DOCNO>")) {
                     String[] line = st.split(" ");
-                    if (line.length == 1){
+                    if (line.length == 1) {
                         docName = line[0];
-                    }
-                    else
-                    {
+                    } else {
                         docName = line[1];
                     }
                 } else if (st.contains("<TEXT>")) {

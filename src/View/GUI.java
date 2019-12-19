@@ -1,13 +1,17 @@
 package View;
 
 import ViewModel.Manager;
+import javafx.scene.control.Alert;
 
 //org.apache.commons.io.FileUtils.cleanDirectory
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.logging.FileHandler;
+
+import static javax.swing.JOptionPane.showMessageDialog;
 
 public class GUI {
 
@@ -155,14 +159,19 @@ public class GUI {
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                File file = new File(outputPath);
-                File[] files = file.listFiles();
-                if(files!=null) { //some JVMs return null for empty dirs
-                    for(File f: files) {
-                        f.delete();
-                    }
+                if (outputPath == null || outputPath.length() == 0) {
+                    showMessageDialog(null, "The output path is empty! \n Please Browse a new path or start the program to submit the output path");
                 }
-                manager = null;
+                else {
+                    File file = new File(outputPath);
+                    File[] files = file.listFiles();
+                    if (files != null) { //some JVMs return null for empty dirs
+                        for (File f : files) {
+                            f.delete();
+                        }
+                    }
+                    manager = null;
+                }
             }
         });
 
@@ -176,8 +185,19 @@ public class GUI {
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                // TODO show dictionary action
-                JOptionPane.showMessageDialog(showDicButton,(manager.getSortedDictionary()));
+                String[][] sortedDic = manager.getSortedDictionary();
+                if (sortedDic!=null)
+                {
+                    JFrame frame = new JFrame("Sorted Dictionary");
+                    frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+                    frame.setPreferredSize(new Dimension(500,500));
+                    String[] definition = {"Term", "Amount of appearance in corpus"};
+                    JTable dicTable = new JTable(sortedDic,definition);
+                    dicTable.setBounds(200,200,200,200);
+                    frame.add(new JScrollPane(dicTable));
+                    frame.pack();
+                    frame.setVisible(true);
+                }
             }
         });
 
@@ -203,12 +223,12 @@ public class GUI {
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("here!");
+//                System.out.println("here!");
                 stemming = stemmingCheckBox.isSelected();
                 try {
                     if (inputPath == null || outputPath == null)
                     {
-                        throw new NullPointerException("The input or output path is empty!");
+                        showMessageDialog(null, "The input or output path is empty!");
                     }
                     else
                     {
@@ -220,7 +240,6 @@ public class GUI {
                 }
             }
         });
-
         panel.add(loadDicButton);
 
 
