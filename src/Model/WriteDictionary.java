@@ -11,18 +11,18 @@ public class WriteDictionary {
     String pathToWrite;
 
     //Constructor
-    public WriteDictionary(){}
+    public WriteDictionary() {
+    }
 
 
     /**
      * this function write the dictionary to disk
+     *
      * @param dictionary - gets the dictionary we got
      */
-    public void run(HashMap<String, String> dictionary)
-    {
+    public void run(HashMap<String, String> dictionary) {
         StringBuilder dictionaryToWrite = new StringBuilder();
-        for (String term : dictionary.keySet())
-        {
+        for (String term : dictionary.keySet()) {
             dictionaryToWrite.append(term).append(":").append(dictionary.get(term)).append("\n");
         }
         try {
@@ -37,20 +37,20 @@ public class WriteDictionary {
 
     /**
      * this function read the dictionary from the disk
+     *
      * @return - dictionary
      */
-    public HashMap<String, String> loadDictionary()
-    {
-        HashMap<String,String> dictionary = new HashMap<>();
+    public HashMap<String, String> loadDictionary() {
+        HashMap<String, String> dictionary = new HashMap<>();
         File file = new File((this.pathToWrite + "\\Dictionary.txt"));
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
             String line;
             while ((line = br.readLine()) != null) {
                 String[] splitLine = line.split(":");
-                dictionary.put(splitLine[0],splitLine[1]);
+                dictionary.put(splitLine[0], splitLine[1]);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.toString();
         }
         return dictionary;
@@ -58,22 +58,17 @@ public class WriteDictionary {
 
     /**
      * Setters
-     * @param path - path to write / read from
-     * @param stemming - what dictionary we want stemming
+     *
+     * @param path         - path to write / read from
+     * @param stemming     - what dictionary we want stemming
      * @param needToChange - if we need to change the path
      */
-    public void setPathToWrite(String path,boolean stemming,boolean needToChange)
-    {
-        if (stemming && needToChange)
-        {
+    public void setPathToWrite(String path, boolean stemming, boolean needToChange) {
+        if (stemming && needToChange) {
             this.pathToWrite = path + "\\With Stemming";
-        }
-        else if (needToChange)
-        {
+        } else if (needToChange) {
             this.pathToWrite = path + "\\Without Stemming";
-        }
-        else
-        {
+        } else {
             this.pathToWrite = path;
         }
 

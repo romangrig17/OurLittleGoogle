@@ -31,10 +31,10 @@ public class WritePostingFile extends Thread {
 
     //initialization semaphores for each posting file
     private static HashMap<String, Semaphore> semaphoreHashMap;
+
     static {
         semaphoreHashMap = new HashMap<>();
-        for (int i=0 ; i<AMOUNT_OF_POSTING_FILES; i++)
-        {
+        for (int i = 0; i < AMOUNT_OF_POSTING_FILES; i++) {
             semaphoreHashMap.put(Integer.toString(i), new Semaphore(1));
         }
     }
@@ -72,6 +72,7 @@ public class WritePostingFile extends Thread {
      * for first this function sort all terms by them hash code to write all term with same hash code in one
      * then the function check if he got this posting file or he need to make new one
      * if he need to update the posting file - he send the terms with same hashcode to reader of posting file
+     *
      * @param postingFile - the posting file
      * @return -
      */
@@ -80,7 +81,7 @@ public class WritePostingFile extends Thread {
         getPackages(postingFile, AMOUNT_OF_POSTING_FILES);
 
         for (Integer termHashCode : termsByHashCode.keySet()) {
-            try{
+            try {
                 if (namesOfPostingFile.contains(termHashCode.toString())) {
                     //we will read all the text in the file - each line we will put to ArrayList
                     //0 - text , 1- path
@@ -109,8 +110,7 @@ public class WritePostingFile extends Thread {
                     }
                     writeToDiskNewTextFile(pathToWrite, termHashCode.toString(), substance.toString());
                 }
-            }catch (Exception e)
-            {
+            } catch (Exception e) {
                 e.toString();
             }
         }
@@ -124,9 +124,10 @@ public class WritePostingFile extends Thread {
      * if we find same term in posting file on disk and on memory - we will update the line and add to this line the new documents that term
      * is appear there and number of appearance
      * Also this function check if the term is written in disk in upper letters - so if we got with lower letters we will change the term
-     * @param pathToWrite - to where write the posting file
+     *
+     * @param pathToWrite       - to where write the posting file
      * @param nameOfPostingFile - the name of posting file
-     * @param hashOfTerms - hash set that got all terms with same hash code
+     * @param hashOfTerms       - hash set that got all terms with same hash code
      * @return - the text after update from posting file
      */
     private StringBuilder[] getTextFromFile(StringBuilder pathToWrite, String nameOfPostingFile, HashSet<String> hashOfTerms) {
@@ -142,29 +143,27 @@ public class WritePostingFile extends Thread {
                 String[] lineSplit = line.split(":");
                 if ((hashOfTerms.contains(lineSplit[0].toUpperCase())) || (hashOfTerms.contains(lineSplit[0].toLowerCase()))) {
                     //if we got our term like in the line with upper letters
-                   if ((hashOfTerms.contains(lineSplit[0].toUpperCase())))
-                   {
-                       String termInPostingFile = lineSplit[0].toUpperCase();
-                       text.append(lineSplit[0]).append(":").append(lineSplit[1]);
-                       Set<String> set_DocsName = postingFile.get(termInPostingFile).keySet();
-                       for (String docName : set_DocsName) {
-                           text.append(docName).append("#").append(postingFile.get(termInPostingFile).get(docName)).append(",");
-                       }
-                       text.append("\n");
-                       hashOfTerms.remove(lineSplit[0].toUpperCase());
-                   }
-                   //if we got our term like in the line with lower letters
-                   else
-                   {
-                       String termInPostingFile = lineSplit[0].toLowerCase();
-                       text.append(termInPostingFile).append(":").append(lineSplit[1]);
-                       Set<String> set_DocsName = postingFile.get(termInPostingFile).keySet();
-                       for (String docName : set_DocsName) {
-                           text.append(docName).append("#").append(postingFile.get(termInPostingFile).get(docName)).append(",");
-                       }
-                       text.append("\n");
-                       hashOfTerms.remove(lineSplit[0].toLowerCase());
-                   }
+                    if ((hashOfTerms.contains(lineSplit[0].toUpperCase()))) {
+                        String termInPostingFile = lineSplit[0].toUpperCase();
+                        text.append(lineSplit[0]).append(":").append(lineSplit[1]);
+                        Set<String> set_DocsName = postingFile.get(termInPostingFile).keySet();
+                        for (String docName : set_DocsName) {
+                            text.append(docName).append("#").append(postingFile.get(termInPostingFile).get(docName)).append(",");
+                        }
+                        text.append("\n");
+                        hashOfTerms.remove(lineSplit[0].toUpperCase());
+                    }
+                    //if we got our term like in the line with lower letters
+                    else {
+                        String termInPostingFile = lineSplit[0].toLowerCase();
+                        text.append(termInPostingFile).append(":").append(lineSplit[1]);
+                        Set<String> set_DocsName = postingFile.get(termInPostingFile).keySet();
+                        for (String docName : set_DocsName) {
+                            text.append(docName).append("#").append(postingFile.get(termInPostingFile).get(docName)).append(",");
+                        }
+                        text.append("\n");
+                        hashOfTerms.remove(lineSplit[0].toLowerCase());
+                    }
 
                 } else {
                     text.append(line).append("\n");
@@ -195,8 +194,9 @@ public class WritePostingFile extends Thread {
 
     /**
      * write the text to posting file - used when we got this posting file
-     * @param path - where to write
-     * @param textInFile - the text to write
+     *
+     * @param path         - where to write
+     * @param textInFile   - the text to write
      * @param termHashCode - the name of posting file
      */
     private void updateThePostingFile(StringBuilder path, StringBuilder textInFile, String termHashCode) {
@@ -214,9 +214,10 @@ public class WritePostingFile extends Thread {
 
     /**
      * write the text to posting file - used when we write the posting file for the first time
-     * @param path - where to write
+     *
+     * @param path       - where to write
      * @param textInFile - the text to write
-     * @param textName - the name of posting file
+     * @param textName   - the name of posting file
      */
     private void writeToDiskNewTextFile(StringBuilder path, String textName, String textInFile) {
         try {
@@ -239,6 +240,7 @@ public class WritePostingFile extends Thread {
 
     /**
      * This function adding all the Entity to hash map
+     *
      * @param postingFile - posting file that we have
      * @param term        - the NTT
      */
@@ -263,9 +265,10 @@ public class WritePostingFile extends Thread {
 
     /**
      * This function write each Entity which appeared more then one time
+     *
      * @param dictionary - dictionary
      */
-    public void writeTheEntity(HashMap<String,String> dictionary) {
+    public void writeTheEntity(HashMap<String, String> dictionary) {
         if (h_Entity.size() < 1) {
             return;
         }
@@ -285,10 +288,11 @@ public class WritePostingFile extends Thread {
 
     /**
      * Add all the text on Entity
+     *
      * @param dictionary - the dictionary
      * @return - text that we need to write
      */
-    private StringBuilder getStringForEntityFile(HashMap<String,String> dictionary) {
+    private StringBuilder getStringForEntityFile(HashMap<String, String> dictionary) {
         StringBuilder entityFile = new StringBuilder();
         //delete each entity that appears only one time
         for (String entity : h_Entity.keySet()) {
@@ -298,9 +302,7 @@ public class WritePostingFile extends Thread {
                     entityFile.append(infoOnEntity);
                 }
                 entityFile.append("\n");
-            }
-            else
-            {
+            } else {
                 dictionary.remove(entity);
             }
         }
@@ -311,6 +313,7 @@ public class WritePostingFile extends Thread {
     /**
      * Sort all terms by theirs hash code
      * We want to write together all the terms that have the same hash code - (same posting file name on disk)
+     *
      * @param postingFile          - posting file from many docs
      * @param amountOfPostingFiles - amount on posting files we want on our disk
      */
