@@ -2,13 +2,11 @@ package ViewModel;
 
 
 import Model.*;
-import javafx.util.Pair;
 
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 public class Manager {
 
@@ -24,7 +22,7 @@ public class Manager {
     String pathForCorpus;
     ArrayList<String> allFiles;
     String[][] sortedDictionary;
-    //StringBuilder docsInfo;
+    StringBuilder docsInfo;
     int counterOfDocs = 0;
     boolean stemming;
 
@@ -36,7 +34,7 @@ public class Manager {
     }
 
     public void run() {
-        //docsInfo = new StringBuilder();
+        docsInfo = new StringBuilder();
         fileReader = new ReadFile(pathForCorpus);
         allFiles = fileReader.getAllFiles();
         this.pathForPostingFile = pathForPostingFile;
@@ -108,28 +106,27 @@ public class Manager {
         //sort the dictionary
         sortByTerms();
 
-        //System.out.println("The amount of unique terms: " + indexer.getDictionary().size());
+        System.out.println("The amount of unique terms: " + indexer.getDictionary().size());
 
         //calculate the time for program
         long elapsedTime = System.currentTimeMillis() - start;
         double elapsedTimeD = (double) elapsedTime;
         System.out.println("The time of program: " + (elapsedTimeD / 60000) + " Min");
-        System.out.println("Im Done Here");
     }
 
     //<editor-fold des="Help Function For GUI>
-//    private void getInfoOnDoc(HashMap<String, Integer> listOfTerms, String docName) {
-//        if (listOfTerms != null && listOfTerms.size() > 2) {
-//            int counterAmount = 0;
-//            for (Integer amount : listOfTerms.values()) {
-//                counterAmount = counterAmount + amount;
-//            }
-//            docsInfo.append("In Doc: ").append(docName).append(" was: ").append(listOfTerms.size()).append(" Terms");
-//            docsInfo.append(" ,And the length of document is:").append(counterAmount);
-//            String popularTerm = Collections.max(listOfTerms.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
-//            docsInfo.append(" And the most popular term is: ").append(popularTerm).append(" And he appeared: ").append(listOfTerms.get(popularTerm)).append(" times. \n");
-//        }
-//    }
+    private void getInfoOnDoc(HashMap<String, Integer> listOfTerms, String docName) {
+        if (listOfTerms != null && listOfTerms.size() > 2) {
+            int counterAmount = 0;
+            for (Integer amount : listOfTerms.values()) {
+                counterAmount = counterAmount + amount;
+            }
+            docsInfo.append("In Doc: ").append(docName).append(" was: ").append(listOfTerms.size()).append(" Terms");
+            docsInfo.append(" ,And the length of document is:").append(counterAmount);
+            String popularTerm = Collections.max(listOfTerms.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
+            docsInfo.append(" And the most popular term is: ").append(popularTerm).append(" And he appeared: ").append(listOfTerms.get(popularTerm)).append(" times. \n");
+        }
+    }
 
 
     /**

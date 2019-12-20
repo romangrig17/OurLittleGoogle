@@ -3,7 +3,6 @@ package Model;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.Semaphore;
-import java.util.regex.Pattern;
 
 public class WritePostingFile extends Thread {
 

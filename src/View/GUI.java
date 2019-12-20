@@ -2,7 +2,6 @@ package View;
 
 import ViewModel.Manager;
 
-//org.apache.commons.io.FileUtils.cleanDirectory
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
