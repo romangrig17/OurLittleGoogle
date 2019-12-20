@@ -32,9 +32,9 @@ public class Indexer {
         {
             //only for now
             //check what we got from parser
-            if (term.length() == 0|| term.charAt(0) == '[' || term.charAt(0) == '.' || term.charAt(0) == '('
+            if (term.length() == 0|| term.charAt(0) == '['
                     || term.charAt(0) == ']' || term.charAt(0) == ')' || term.charAt(0) == ',' || term.charAt(0) == '"' ||
-                    term.charAt(0) == '\'' || term.charAt(0) == '`' || term.charAt(0) == '_' || term.charAt(0) == ' ')
+                    term.charAt(0) == '\'' || term.charAt(0) == '`' || term.charAt(0) == '_')
             {
                 //System.out.println(term);
                 continue;

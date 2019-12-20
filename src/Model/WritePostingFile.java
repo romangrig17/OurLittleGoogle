@@ -27,7 +27,7 @@ public class WritePostingFile extends Thread {
     HashMap<Integer, HashSet<String>> termsByHashCode;
 
     //amount of the posting files we write
-    private static final int AMOUNT_OF_POSTING_FILES = 1500;
+    private static final int AMOUNT_OF_POSTING_FILES = 1000;
 
     private static HashMap<String, Semaphore> semaphoreHashMap;
     static {
