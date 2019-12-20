@@ -40,15 +40,12 @@ public class Manager {
         fileReader = new ReadFile(pathForCorpus);
         allFiles = fileReader.getAllFiles();
         this.pathForPostingFile = pathForPostingFile;
-        if (stemming)
-        {
-            this.pathForPostingFile = pathForPostingFile +"\\With Stemming";
+        if (stemming) {
+            this.pathForPostingFile = pathForPostingFile + "\\With Stemming";
             new File(pathForPostingFile).mkdirs();
             writePostingFile = new WritePostingFile(new StringBuilder(pathForPostingFile));
-        }
-        else
-        {
-            this.pathForPostingFile = pathForPostingFile +"\\Without Stemming";
+        } else {
+            this.pathForPostingFile = pathForPostingFile + "\\Without Stemming";
             File file = new File(pathForPostingFile);
             file.mkdir();
             writePostingFile = new WritePostingFile(new StringBuilder(pathForPostingFile));
@@ -96,20 +93,20 @@ public class Manager {
             }
         }
         //if there is more unwritten posting file
-        if (counterOfDocs > 0)
-        {
+        if (counterOfDocs > 0) {
             writePostingFile.putPostingFile(indexer.getPostingFile());
             threadPool.execute(writePostingFile);
         }
         // once you've submitted your last job to the service it should be shut down
         threadPool.shutdown();
-        while (!threadPool.isTerminated()) {}
+        while (!threadPool.isTerminated()) {
+        }
 
         //writing all the entity we got in corpus and check if the appear more then one time
         writePostingFile.writeTheEntity(indexer.getDictionary());
 
         //writing the dictionary to disk
-        writeDictionary.setPathToWrite(pathForPostingFile,stemming,false);
+        writeDictionary.setPathToWrite(pathForPostingFile, stemming, false);
         writeDictionary.run(indexer.getDictionary());
 
         //sort the dictionary
@@ -120,7 +117,7 @@ public class Manager {
         //calculate the time for program
         long elapsedTime = System.currentTimeMillis() - start;
         double elapsedTimeD = (double) elapsedTime;
-        System.out.println("The time of program: " + (elapsedTimeD/60000) + " Min");
+        System.out.println("The time of program: " + (elapsedTimeD / 60000) + " Min");
         System.out.println("Im Done Here");
     }
 
@@ -141,6 +138,7 @@ public class Manager {
 
     /**
      * return sorted dictionary: [0] - the term, [1] - the info on term
+     *
      * @return - sorted dictionary in array
      */
     public String[][] getSortedDictionary() {
@@ -161,11 +159,11 @@ public class Manager {
         sorted.putAll(dictionary);
 
         // Display the TreeMap which is naturally sorted
-        int i=0;
+        int i = 0;
         for (HashMap.Entry<String, String> entry : sorted.entrySet()) {
 
             sortedDictionary[i][0] = entry.getKey();
-            sortedDictionary[i][1] = entry.getValue();
+            sortedDictionary[i][1] = entry.getValue().split(",")[0];
             i++;
         }
     }
@@ -173,35 +171,32 @@ public class Manager {
     /**
      * This function is loading the dictionary to memory
      */
-    public void loadDictionary(boolean stemming)
-    {
-        writeDictionary.setPathToWrite(pathForPostingFile,stemming,true);
+    public void loadDictionary(boolean stemming) {
+        writeDictionary.setPathToWrite(pathForPostingFile, stemming, true);
         indexer.setDictionary(writeDictionary.loadDictionary());
     }
     //</editor-fold>
 
     //<editor-fold des="Setters">
+
     /**
      * @param path - where we write the posting file
      */
-    public void setPathForPostingFile(String path)
-    {
+    public void setPathForPostingFile(String path) {
         this.pathForPostingFile = path;
     }
 
     /**
      * @param stemming - set the stemming option
      */
-    public void setStemming(boolean stemming)
-    {
+    public void setStemming(boolean stemming) {
         this.stemming = stemming;
     }
 
     /**
      * @param path - from where to read our corpus
      */
-    public void setPathForCorpus(String path)
-    {
+    public void setPathForCorpus(String path) {
         this.pathForCorpus = path;
     }
     //</editor-fold>

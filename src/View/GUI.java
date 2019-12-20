@@ -28,7 +28,7 @@ public class GUI {
         // Creating instance of JFrame
         JFrame frame = new JFrame("Our Little Google");
         // Setting the width and height of frame
-        frame.setSize(430,230);
+        frame.setSize(430, 230);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         /* Creating panel. This is same as a div tag in HTML
@@ -43,7 +43,7 @@ public class GUI {
          * to the panel.
          */
         placeComponents(panel);
-        
+
         // Setting the frame visibility to true
         frame.setVisible(true);
         //initialization of manager
@@ -51,8 +51,7 @@ public class GUI {
 
     }
 
-    public void placeComponents(JPanel panel)
-    {
+    public void placeComponents(JPanel panel) {
         panel.setLayout(null);
         // Creating JLabel
         JLabel inputLabel = new JLabel("Input path:");
@@ -62,67 +61,33 @@ public class GUI {
          * corner and remaining two arguments are the width
          * and height of the component.
          */
-        inputLabel.setBounds(10,20,80,25);
+        inputLabel.setBounds(10, 20, 80, 25);
         panel.add(inputLabel);
 
         // Creating text field for input
         JTextField inputText = new JTextField(20);
-        inputText.setBounds(100,20,165,25);
+        inputText.setBounds(100, 20, 165, 25);
         panel.add(inputText);
 
         // Same process for output field.
         JLabel outputLabel = new JLabel("Output path:");
-        outputLabel.setBounds(10,50,80,25);
+        outputLabel.setBounds(10, 50, 80, 25);
         panel.add(outputLabel);
 
 
         JTextField outputText = new JTextField(20);
-        outputText.setBounds(100,50,165,25);
+        outputText.setBounds(100, 50, 165, 25);
         panel.add(outputText);
 
 
         JButton inputBrowseButton = new JButton("Browse");
-        inputBrowseButton.setBounds(280,20,80,25);
+        inputBrowseButton.setBounds(280, 20, 80, 25);
         panel.add(inputBrowseButton);
 
 
-
         // Creating input browse button
 
-        inputBrowseButton.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
-                JFileChooser fileChooser = new JFileChooser();
-
-                // For Directory
-                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-                // For File
-                //fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-
-                fileChooser.setAcceptAllFileFilterUsed(false);
-
-                int rVal = fileChooser.showOpenDialog(null);
-                if (rVal == JFileChooser.APPROVE_OPTION)
-                {
-                    inputText.setText(fileChooser.getSelectedFile().toString());
-                    inputPath = fileChooser.getSelectedFile().toString();
-                    setInputPath(inputPath);
-                    manager.setPathForCorpus(inputPath);
-                }
-            }
-        });
-
-
-        // Creating input browse button
-
-        JButton outputBrowseButton = new JButton("Browse");
-        outputBrowseButton.setBounds(280,50,80,25);
-        panel.add(outputBrowseButton);
-
-        outputBrowseButton.addActionListener(new ActionListener()
-        {
+        inputBrowseButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser();
 
@@ -135,8 +100,36 @@ public class GUI {
                 fileChooser.setAcceptAllFileFilterUsed(false);
 
                 int rVal = fileChooser.showOpenDialog(null);
-                if (rVal == JFileChooser.APPROVE_OPTION)
-                {
+                if (rVal == JFileChooser.APPROVE_OPTION) {
+                    inputText.setText(fileChooser.getSelectedFile().toString());
+                    inputPath = fileChooser.getSelectedFile().toString();
+                    setInputPath(inputPath);
+                    manager.setPathForCorpus(inputPath);
+                }
+            }
+        });
+
+
+        // Creating input browse button
+
+        JButton outputBrowseButton = new JButton("Browse");
+        outputBrowseButton.setBounds(280, 50, 80, 25);
+        panel.add(outputBrowseButton);
+
+        outputBrowseButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser();
+
+                // For Directory
+                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+                // For File
+                //fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+                fileChooser.setAcceptAllFileFilterUsed(false);
+
+                int rVal = fileChooser.showOpenDialog(null);
+                if (rVal == JFileChooser.APPROVE_OPTION) {
                     outputText.setText(fileChooser.getSelectedFile().toString());
                     outputPath = fileChooser.getSelectedFile().toString();
                     setOutputPath(outputPath);
@@ -144,8 +137,6 @@ public class GUI {
                 }
             }
         });
-
-
 
 
         // Creating stemming checkBox
@@ -157,22 +148,16 @@ public class GUI {
         // Creating zero button
         JButton zeroButton = new JButton("Zero");
         zeroButton.setBounds(10, 120, 80, 25);
-        zeroButton.addActionListener(new ActionListener()
-        {
+        zeroButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 if (getOutputPath() == null || getOutputPath().length() == 0) {
                     showMessageDialog(null, "The output path is empty! \n Please Browse a new path.");
-                }
-                else {
+                } else {
                     File file = null;
-                    if(stemmingCheckBox.isSelected())
-                    {
+                    if (stemmingCheckBox.isSelected()) {
                         file = new File(getOutputPath() + "\\With Stemming");
-                    }
-                    else
-                    {
+                    } else {
                         file = new File(getOutputPath() + "\\Without Stemming");
                     }
 
@@ -192,20 +177,17 @@ public class GUI {
         // Creating showDic button
         JButton showDicButton = new JButton("Show dictionary");
         showDicButton.setBounds(110, 120, 125, 25);
-        showDicButton.addActionListener(new ActionListener()
-        {
+        showDicButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
+            public void actionPerformed(ActionEvent e) {
                 String[][] sortedDic = manager.getSortedDictionary();
-                if (sortedDic!=null)
-                {
+                if (sortedDic != null) {
                     JFrame frame = new JFrame("Sorted Dictionary");
                     frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-                    frame.setPreferredSize(new Dimension(500,500));
+                    frame.setPreferredSize(new Dimension(500, 500));
                     String[] definition = {"Term", "Amount of appearance in corpus"};
-                    JTable dicTable = new JTable(sortedDic,definition);
-                    dicTable.setBounds(200,200,200,200);
+                    JTable dicTable = new JTable(sortedDic, definition);
+                    dicTable.setBounds(200, 200, 200, 200);
                     frame.add(new JScrollPane(dicTable));
                     frame.pack();
                     frame.setVisible(true);
@@ -218,17 +200,12 @@ public class GUI {
         // Creating loadDic button
         JButton loadDicButton = new JButton("Load dictionary");
         loadDicButton.setBounds(255, 120, 125, 25);
-        loadDicButton.addActionListener(new ActionListener()
-        {
+        loadDicButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                if (manager != null && getOutputPath()!= null)
-                {
+            public void actionPerformed(ActionEvent e) {
+                if (manager != null && getOutputPath() != null) {
                     manager.loadDictionary(stemmingCheckBox.isSelected());
-                }
-                else
-                {
+                } else {
                     showMessageDialog(null, "The output path is empty! \n Please Browse a new path");
                 }
 
@@ -237,7 +214,7 @@ public class GUI {
 
         // Creating start button
         JButton startButton = new JButton("Start!");
-        startButton.setBounds(280,80,80,25);
+        startButton.setBounds(280, 80, 80, 25);
         panel.add(startButton);
 
         startButton.addActionListener(new ActionListener() {
@@ -247,17 +224,13 @@ public class GUI {
                 stemming = stemmingCheckBox.isSelected();
                 setStemming(stemming);
                 try {
-                    if (getInputPath() == null || getOutputPath() == null)
-                    {
+                    if (getInputPath() == null || getOutputPath() == null) {
                         showMessageDialog(null, "The input or output path is empty!");
-                    }
-                    else
-                    {
+                    } else {
                         manager.setStemming(stemming);
                         manager.run();
                     }
-                }catch (NullPointerException e1)
-                {
+                } catch (NullPointerException e1) {
                     e1.toString();
                 }
             }
@@ -268,29 +241,27 @@ public class GUI {
     }
 
     //<editor-fold des="Setters and Getters>"
-    public void setOutputPath(String path)
-    {
+    public void setOutputPath(String path) {
         this.outputPath = path;
     }
-    public void setInputPath(String path)
-    {
+
+    public void setInputPath(String path) {
         this.inputPath = path;
     }
-    public void setStemming(boolean stemming)
-    {
+
+    public void setStemming(boolean stemming) {
         this.stemming = stemming;
     }
 
-    public String getOutputPath()
-    {
+    public String getOutputPath() {
         return outputPath;
     }
-    public String getInputPath()
-    {
+
+    public String getInputPath() {
         return inputPath;
     }
-    public boolean isStemming()
-    {
+
+    public boolean isStemming() {
         return stemming;
     }
     //</editor-fold>
