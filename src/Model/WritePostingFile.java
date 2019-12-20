@@ -7,7 +7,7 @@ import java.util.concurrent.Semaphore;
 public class WritePostingFile extends Thread {
 
     //path where we write the posting files
-    StringBuilder pathToWrite;
+    String pathToWrite;
 
     //an hash map for Entity`s - if the list size >2 we will write them.
     HashMap<String, LinkedList<String>> h_Entity;
@@ -23,7 +23,7 @@ public class WritePostingFile extends Thread {
     private HashMap<String, HashMap<String, Integer>> postingFile;
 
     //hash map to collect the terms by theirs hash code(name of posting file in disk)
-    HashMap<Integer, HashSet<String>> termsByHashCode;
+
 
     //amount of the posting files we write
     private static final int AMOUNT_OF_POSTING_FILES = 1000;
@@ -43,7 +43,7 @@ public class WritePostingFile extends Thread {
      *
      * @param pathToWrite - to where we want write the posting files
      */
-    public WritePostingFile(StringBuilder pathToWrite) {
+    public WritePostingFile(String pathToWrite) {
         this.pathToWrite = pathToWrite;
         this.h_Entity = new HashMap<>();
         this.namesOfPostingFile = new HashSet<>();
@@ -77,19 +77,19 @@ public class WritePostingFile extends Thread {
      */
     private boolean toWrite(HashMap<String, HashMap<String, Integer>> postingFile) {
         //gets the terms that need to be written by them hashcode
-        getPackages(postingFile, AMOUNT_OF_POSTING_FILES);
+        HashMap<Integer, HashSet<String>> termsByHashCode = getPackages(postingFile, AMOUNT_OF_POSTING_FILES);
 
         for (Integer termHashCode : termsByHashCode.keySet()) {
             try {
                 if (namesOfPostingFile.contains(termHashCode.toString())) {
                     //we will read all the text in the file - each line we will put to ArrayList
                     //0 - text , 1- path
-                    StringBuilder[] infoPostingFile = getTextFromFile(pathToWrite, termHashCode.toString(), termsByHashCode.get(termHashCode));
+                    String[] infoPostingFile = getTextFromFile(pathToWrite, termHashCode.toString(), termsByHashCode.get(termHashCode));
                     if (infoPostingFile == null) {
                         System.out.println("Problem to read from text in: " + termHashCode);
                         continue;
                     }
-                    StringBuilder updatedText = infoPostingFile[0];
+                    String updatedText = infoPostingFile[0];
                     updateThePostingFile(infoPostingFile[1], updatedText, termHashCode.toString());
 
                 } else {
@@ -129,11 +129,11 @@ public class WritePostingFile extends Thread {
      * @param hashOfTerms       - hash set that got all terms with same hash code
      * @return - the text after update from posting file
      */
-    private StringBuilder[] getTextFromFile(StringBuilder pathToWrite, String nameOfPostingFile, HashSet<String> hashOfTerms) {
+    private String[] getTextFromFile(String pathToWrite, String nameOfPostingFile, HashSet<String> hashOfTerms) {
         try {
             semaphoreHashMap.get(nameOfPostingFile).acquire();
-            StringBuilder fullPath = new StringBuilder(pathToWrite).append("\\").append(nameOfPostingFile).append(".txt");
-            File file = new File(fullPath.toString());
+            String fullPath = pathToWrite+"\\"+nameOfPostingFile+".txt";
+            File file = new File(fullPath);
             BufferedReader br = new BufferedReader(new FileReader(file));
             String line;
             StringBuilder text = new StringBuilder();
@@ -180,8 +180,8 @@ public class WritePostingFile extends Thread {
                 //not founded we will add him to end
             }
             br.close();
-            StringBuilder[] infoPostingFile = new StringBuilder[2];
-            infoPostingFile[0] = text;
+            String[] infoPostingFile = new String[2];
+            infoPostingFile[0] = text.toString();
             infoPostingFile[1] = fullPath;
             semaphoreHashMap.get(nameOfPostingFile).release();
             return infoPostingFile;
@@ -198,12 +198,12 @@ public class WritePostingFile extends Thread {
      * @param textInFile   - the text to write
      * @param termHashCode - the name of posting file
      */
-    private void updateThePostingFile(StringBuilder path, StringBuilder textInFile, String termHashCode) {
+    private void updateThePostingFile(String path, String textInFile, String termHashCode) {
         try {
             semaphoreHashMap.get(termHashCode).acquire();
-            File file = new File(path.toString());
+            File file = new File(path);
             FileWriter writer = new FileWriter(file);
-            writer.write(textInFile.toString());
+            writer.write(textInFile);
             writer.close();
             semaphoreHashMap.get(termHashCode).release();
         } catch (Exception e) {
@@ -218,11 +218,11 @@ public class WritePostingFile extends Thread {
      * @param textInFile - the text to write
      * @param textName   - the name of posting file
      */
-    private void writeToDiskNewTextFile(StringBuilder path, String textName, String textInFile) {
+    private void writeToDiskNewTextFile(String path, String textName, String textInFile) {
         try {
             semaphoreHashMap.get(textName).acquire();
-            StringBuilder pathToWrite = new StringBuilder(path).append("\\").append(textName).append(".txt");
-            File file = new File(pathToWrite.toString());
+            String pathToWrite = path+"\\"+textName+".txt";
+            File file = new File(pathToWrite);
             //Create the file
             file.createNewFile();
             FileWriter writer = new FileWriter(file);
@@ -316,15 +316,15 @@ public class WritePostingFile extends Thread {
      * @param postingFile          - posting file from many docs
      * @param amountOfPostingFiles - amount on posting files we want on our disk
      */
-    synchronized private void getPackages(HashMap<String, HashMap<String, Integer>> postingFile, int amountOfPostingFiles) {
-        termsByHashCode = new HashMap<>();
+    synchronized private HashMap<Integer, HashSet<String>> getPackages(HashMap<String, HashMap<String, Integer>> postingFile, int amountOfPostingFiles) {
+        HashMap<Integer, HashSet<String>> termsByHashCode = new HashMap<>();
         for (String term : postingFile.keySet()) {
             if (term.charAt(0) == '!') {
                 addNewEntity(postingFile, term);
                 //postingFile.remove(term);
                 continue;
             }
-            Integer termHashCode = (Math.abs(term.toLowerCase().hashCode() % amountOfPostingFiles));
+            int termHashCode = (Math.abs((term.toLowerCase()).hashCode() % amountOfPostingFiles));
             if (termsByHashCode.containsKey(termHashCode)) {
                 termsByHashCode.get(termHashCode).add(term);
             } else {
@@ -333,6 +333,7 @@ public class WritePostingFile extends Thread {
                 termsByHashCode.put(termHashCode, temp);
             }
         }
+        return  termsByHashCode;
     }
 
 }

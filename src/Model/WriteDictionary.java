@@ -23,7 +23,14 @@ public class WriteDictionary {
     public void run(HashMap<String, String> dictionary) {
         StringBuilder dictionaryToWrite = new StringBuilder();
         for (String term : dictionary.keySet()) {
-            dictionaryToWrite.append(term).append(":").append(dictionary.get(term)).append("\n");
+            if(term.charAt(0) == '!')
+            {
+                dictionaryToWrite.append(term.substring(1)).append(":").append(dictionary.get(term)).append("\n");
+            }
+            else
+            {
+                dictionaryToWrite.append(term).append(":").append(dictionary.get(term)).append("\n");
+            }
         }
         try {
             File file = new File((pathToWrite + "\\Dictionary.txt"));

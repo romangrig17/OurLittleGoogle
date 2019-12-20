@@ -41,12 +41,12 @@ public class Manager {
         if (stemming) {
             this.pathForPostingFile = pathForPostingFile + "\\With Stemming";
             new File(pathForPostingFile).mkdirs();
-            writePostingFile = new WritePostingFile(new StringBuilder(pathForPostingFile));
+            writePostingFile = new WritePostingFile(pathForPostingFile);
         } else {
             this.pathForPostingFile = pathForPostingFile + "\\Without Stemming";
             File file = new File(pathForPostingFile);
             file.mkdir();
-            writePostingFile = new WritePostingFile(new StringBuilder(pathForPostingFile));
+            writePostingFile = new WritePostingFile(pathForPostingFile);
         }
         StopWords stopWords = new StopWords(pathForCorpus);
         // create a pool of threads, 5 max jobs will execute in parallel
@@ -79,6 +79,7 @@ public class Manager {
                 //make a batch of document in posting file, each batch written to disk
                 counterOfDocs++;
                 if (counterOfDocs == AMOUNT_OF_DOCS_IN_POSTING_FILE) {
+                    indexer.setDictionary(updateDictionary(indexer.getDictionary()));
                     counterOfDocs = 0;
                     writePostingFile.putPostingFile(indexer.getPostingFile());
                     threadPool.execute(writePostingFile);
@@ -98,7 +99,6 @@ public class Manager {
 
         //writing all the entity we got in corpus and check if the appear more then one time
         writePostingFile.writeTheEntity(indexer.getDictionary());
-
         //writing the dictionary to disk
         writeDictionary.setPathToWrite(pathForPostingFile, stemming, false);
         writeDictionary.run(indexer.getDictionary());
@@ -167,6 +167,28 @@ public class Manager {
     public void loadDictionary(boolean stemming) {
         writeDictionary.setPathToWrite(pathForPostingFile, stemming, true);
         indexer.setDictionary(writeDictionary.loadDictionary());
+    }
+
+    public HashMap<String,String> updateDictionary(HashMap<String,String> dictionary)
+    {
+        HashMap<String,String> updatedDictionary = new HashMap<>();
+        Set<String> allterms = dictionary.keySet();
+        for (String term : allterms)
+        {
+            if(term.charAt(0)>= 'A' && term.charAt(0) <= 'Z' && dictionary.containsKey(term.toLowerCase()))
+            {
+                String[] splitLineOfUpper = dictionary.get(term).split(",");
+                String[] splitLineOfLowwer = dictionary.get(term).split(",");
+                int amountOfAppearance = Integer.parseInt(splitLineOfUpper[0]) + Integer.parseInt(splitLineOfLowwer[0]);
+                int numberOfDocs = Integer.parseInt(splitLineOfUpper[1]) + Integer.parseInt(splitLineOfLowwer[1]);
+                updatedDictionary.put(term.toLowerCase(),amountOfAppearance + "," + numberOfDocs + "," + splitLineOfLowwer[2]);
+            }
+            else
+            {
+                updatedDictionary.put(term,dictionary.get(term));
+            }
+        }
+        return updatedDictionary;
     }
     //</editor-fold>
 

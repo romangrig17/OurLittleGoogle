@@ -96,7 +96,6 @@ public class Indexer {
                         addToPostingFile(originalTerm.toLowerCase(), docName, listOfTerms.get(term));
                     }
                 }
-
             } else if (dictionary.containsKey(originalTerm.toUpperCase())) {
                 /**
                  * if the word is in dictionary with big letters
