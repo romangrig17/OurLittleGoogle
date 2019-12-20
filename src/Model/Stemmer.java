@@ -33,9 +33,7 @@ package Model;
 
 */
 
-import java.io.*;
 import java.util.HashMap;
-import java.util.regex.Pattern;
 
 /**
  * Stemmer, implementing the Porter Stemming Algorithm
@@ -65,7 +63,7 @@ public class Stemmer
 
         for (String termBeforeStemming : listOfTerms.keySet())
         {
-            if (!(termBeforeStemming.charAt(0)>='0' && termBeforeStemming.charAt(0)<='9') && termBeforeStemming.length() > 1)
+            if (!(termBeforeStemming.charAt(0)>='0' && termBeforeStemming.charAt(0)<='9'))
             {
                 String termAfterStemming = Stemming(termBeforeStemming);
                 if (listOfTermsAfterStemming.containsKey(termAfterStemming))

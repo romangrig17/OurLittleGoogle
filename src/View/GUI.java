@@ -1,7 +1,6 @@
 package View;
 
 import ViewModel.Manager;
-import javafx.scene.control.Alert;
 
 //org.apache.commons.io.FileUtils.cleanDirectory
 import javax.swing.*;
@@ -9,14 +8,13 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.logging.FileHandler;
 
 import static javax.swing.JOptionPane.showMessageDialog;
 
 public class GUI {
 
-    String inputPath;
-    String outputPath;
+    public String inputPath;
+    public String outputPath;
     boolean stemming;
 
     Manager manager;
@@ -26,6 +24,7 @@ public class GUI {
      */
 
     public GUI() {
+
         // Creating instance of JFrame
         JFrame frame = new JFrame("Our Little Google");
         // Setting the width and height of frame
@@ -49,9 +48,11 @@ public class GUI {
         // Setting the frame visibility to true
         frame.setVisible(true);
 
+        this.manager = new Manager();
+
     }
 
-    private void placeComponents(JPanel panel)
+    public void placeComponents(JPanel panel)
     {
         panel.setLayout(null);
         // Creating JLabel
@@ -110,6 +111,8 @@ public class GUI {
                 {
                     inputText.setText(fileChooser.getSelectedFile().toString());
                     inputPath = fileChooser.getSelectedFile().toString();
+                    setInputPath(inputPath);
+                    manager.setPathForCorpus(inputPath);
                 }
             }
         });
@@ -139,9 +142,12 @@ public class GUI {
                 {
                     outputText.setText(fileChooser.getSelectedFile().toString());
                     outputPath = fileChooser.getSelectedFile().toString();
+                    setOutputPath(outputPath);
+                    manager.setPathForPostingFile(outputPath);
                 }
             }
         });
+
 
 
 
@@ -159,11 +165,20 @@ public class GUI {
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                if (outputPath == null || outputPath.length() == 0) {
-                    showMessageDialog(null, "The output path is empty! \n Please Browse a new path or start the program to submit the output path");
+                if (getOutputPath() == null || getOutputPath().length() == 0) {
+                    showMessageDialog(null, "The output path is empty! \n Please Browse a new path.");
                 }
                 else {
-                    File file = new File(outputPath);
+                    File file = null;
+                    if(stemmingCheckBox.isSelected())
+                    {
+                        file = new File(getOutputPath() + "\\With Stemming");
+                    }
+                    else
+                    {
+                        file = new File(getOutputPath() + "\\Without Stemming");
+                    }
+
                     File[] files = file.listFiles();
                     if (files != null) { //some JVMs return null for empty dirs
                         for (File f : files) {
@@ -211,6 +226,14 @@ public class GUI {
             @Override
             public void actionPerformed(ActionEvent e)
             {
+                if (manager != null && getOutputPath()!= null)
+                {
+                    manager.loadDictionary(stemmingCheckBox.isSelected());
+                }
+                else
+                {
+                    showMessageDialog(null, "The output path is empty! \n Please Browse a new path");
+                }
                 // TODO load dictionary action
 
             }
@@ -225,14 +248,16 @@ public class GUI {
             public void actionPerformed(ActionEvent e) {
 //                System.out.println("here!");
                 stemming = stemmingCheckBox.isSelected();
+                setStemming(stemming);
                 try {
-                    if (inputPath == null || outputPath == null)
+                    if (getInputPath() == null || getOutputPath() == null)
                     {
                         showMessageDialog(null, "The input or output path is empty!");
                     }
                     else
                     {
-                        manager = new Manager(inputPath,outputPath,stemming);
+                        manager.setStemming(stemming);
+                        manager.run();
                     }
                 }catch (NullPointerException e1)
                 {
@@ -243,6 +268,32 @@ public class GUI {
         panel.add(loadDicButton);
 
 
+    }
+
+    public void setOutputPath(String path)
+    {
+        this.outputPath = path;
+    }
+    public void setInputPath(String path)
+    {
+        this.inputPath = path;
+    }
+    public void setStemming(boolean stemming)
+    {
+        this.stemming = stemming;
+    }
+
+    public String getOutputPath()
+    {
+        return outputPath;
+    }
+    public String getInputPath()
+    {
+        return inputPath;
+    }
+    public boolean isStemming()
+    {
+        return stemming;
     }
 }
 

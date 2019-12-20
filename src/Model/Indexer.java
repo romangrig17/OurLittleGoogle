@@ -34,9 +34,8 @@ public class Indexer {
             //check what we got from parser
             if (term.length() == 0|| term.charAt(0) == '['
                     || term.charAt(0) == ']' || term.charAt(0) == ')' || term.charAt(0) == ',' || term.charAt(0) == '"' ||
-                    term.charAt(0) == '\'' || term.charAt(0) == '`' || term.charAt(0) == '_')
+                    term.charAt(0) == '\'' || term.charAt(0) == '`' || term.charAt(0) == '_' || term.charAt(0) == ' ')
             {
-                //System.out.println(term);
                 continue;
             }
             //make all the term with upper letters if the first letter is upper
@@ -108,7 +107,7 @@ public class Indexer {
                     }
                 }
                 else
-                    //if the term we got was is low letters and we got him with low letters - first time in the doc
+                //if the term we got was is low letters and we got him with low letters - first time in the doc
                 {
                     Integer updateNumberOfTimesInAllCorpus = (Integer.parseInt(splitedDic[0])) + listOfTerms.get(term);
                     Integer updateNumberOfDocuments = (Integer.parseInt(splitedDic[1])) + 1;
@@ -215,9 +214,9 @@ public class Indexer {
      */
     private void addToDictionary(String term,Integer howManyTimesAppearedInThisDoc, String docName)
     {
-            // if the term is for the first time in the dictionary
-            dictionary.put(term, howManyTimesAppearedInThisDoc + ",1," + docName + ",");
-            addToPostingFile(term,docName,howManyTimesAppearedInThisDoc);
+        // if the term is for the first time in the dictionary
+        dictionary.put(term, howManyTimesAppearedInThisDoc + ",1," + docName + ",");
+        addToPostingFile(term,docName,howManyTimesAppearedInThisDoc);
     }
 
     //</editor-fold>
@@ -309,6 +308,9 @@ public class Indexer {
     //</editor-fold>
 
     //<editor-fold des="Setters"
-
+    public void setDictionary(HashMap<String,String> dictionary)
+    {
+        this.dictionary = dictionary;
+    }
     //</editor-fold>
 }
