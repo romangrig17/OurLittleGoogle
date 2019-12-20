@@ -50,9 +50,6 @@ public class Manager {
             file.mkdir();
             writePostingFile = new WritePostingFile(new StringBuilder(pathForPostingFile));
         }
-        /**
-         * TODO:Get path for Stop Words
-         */
         StopWords stopWords = new StopWords(pathForCorpus);
         // create a pool of threads, 5 max jobs will execute in parallel
         ExecutorService threadPool = Executors.newFixedThreadPool(5);
@@ -61,7 +58,6 @@ public class Manager {
         for (String file : allFiles) {
             HashMap<String, StringBuilder> allTextsFromTheFile = fileReader.getTextsFromTheFile(new File(file));
             Parser parser = new Parser();
-            Iterator it = allTextsFromTheFile.keySet().iterator();
             for (String docID : allTextsFromTheFile.keySet()) {
                 //parsing each doc
                 HashMap<String, Integer> listOfTerms = parser.parseDoc(allTextsFromTheFile.get(docID).toString(), docID);

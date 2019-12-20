@@ -19,10 +19,6 @@ public class GUI {
 
     Manager manager;
 
-    /**
-     * TODO: on Zero button - check the path and throw exception if needed
-     */
-
     public GUI() {
 
         // Creating instance of JFrame
