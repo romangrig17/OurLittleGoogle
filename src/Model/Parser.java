@@ -55,34 +55,23 @@ public class Parser implements IParser{
 
 
 	//This function parse the input doc_text.
-	//The output is a hashmap of all the parsed words:
+	//The output is a hashMap of all the parsed words:
 	//first string is the term,int is the count.
 	public HashMap<String,Integer> parseDoc(String doc_Text, String doc_Number)
 	{
 		HashMap<String,Integer> termsHash= new HashMap<>();
 		StringBuffer sb1 = new StringBuffer(doc_Text);
 
-		//System.out.println("******");
-		//System.out.println("start parseNames Date: " +LocalTime.now());
 		sb1 = parseNames(termsHash,sb1);
-		//System.out.println("start parsePercent Date: " +LocalTime.now());
 		sb1=parsePercent(termsHash, sb1);
-		//System.out.println("start parseDate Date: " +LocalTime.now());
 		sb1=parseDate(termsHash,sb1);
-		//System.out.println("start parsePrices Date: " +LocalTime.now());
 		sb1=parsePrices(termsHash,sb1);
-		//System.out.println("start parsePhoneNumber Date: " +LocalTime.now());
 		sb1=parsePhoneNumber(termsHash,sb1);
-		//System.out.println("start parseExpressions Date: " +LocalTime.now());
 		sb1=parseExpressions(termsHash,sb1);
-		//System.out.println("start parseKG Date: " +LocalTime.now());
 		sb1=parseKG(termsHash,sb1);
-		//System.out.println("start parseNumbers Date: " +LocalTime.now());
 		sb1=parseNumbers(termsHash,sb1);
-		//System.out.println("start parseEndWords Date: " +LocalTime.now());
 		parseEndWords(termsHash,sb1);
-		//System.out.println("******");
-		//printHash(termsHash);// for checking you can print
+		//printHash(termsHash);
 
 		return termsHash;
 	}
@@ -98,7 +87,6 @@ public class Parser implements IParser{
 		while (matcher.find())
 		{
 			matched = true;
-			//System.out.println("matched phone: "+ matcher.group());
 			addToHash(terms_Hash,matcher.group());
 			matcher.appendReplacement(sb1, "");
 		}
@@ -164,14 +152,8 @@ public class Parser implements IParser{
 
 			if(allWords[i].matches("[A-z]{2,}"))
 			{
-
-				//System.out.println("end: "+allWords[i] );
 				addToHash(terms_Hash,allWords[i]);
 			}
-	    	/*else
-	    	{
-	    		//System.out.println("no end for: "+allWords[i] );
-	    	}*/
 		}
 
 		doc_Text.setLength(0);
@@ -197,12 +179,10 @@ public class Parser implements IParser{
 		while (matcher.find())
 		{
 			String[] allWords = matcher.group().toString().split("-");
-			//System.out.println("matched expression: "+ matcher.group());
 			for (int i=0; i<allWords.length; i++)
 			{
 				if(Character.isDigit(allWords[i].charAt(0)) )//adding number too
 				{
-					//System.out.println("adding number!!! "+allWords[i].charAt(0)+" "+ allWords[i]);
 					addToHash(terms_Hash,allWords[i]);
 				}
 			}
@@ -216,7 +196,6 @@ public class Parser implements IParser{
 		while (matcher.find())
 		{
 			String[] allWords = matcher.group().toString().split(" ");
-			//System.out.println("matched patternBetweenNumberAndNumber: "+ matcher.group() + "adding also "+allWords[1] +" and "+ allWords[3]);
 			addToHash(terms_Hash,allWords[1]);
 			addToHash(terms_Hash,allWords[3]);
 		}
@@ -240,17 +219,14 @@ public class Parser implements IParser{
 			String[] allWords = matcher.group().toString().split(" ");
 			if(allWords[1].equals("Thousand"))
 			{
-				//System.out.println("match Thousand :"+matcher.group()+"adding: "+allWords[0]+"K" );
 				addToHash(terms_Hash,allWords[0]+"K");
 			}
 			else if(allWords[1].equals("Million"))
 			{
-				//System.out.println("match Million :"+matcher.group()+"adding: "+allWords[0]+"M");
 				addToHash(terms_Hash,allWords[0]+"M");
 			}
 			else
 			{
-				//System.out.println("match Billion :"+matcher.group()+"adding: "+allWords[0]+"B");
 				addToHash(terms_Hash,allWords[0]+"B");
 			}
 			matcher.appendReplacement(sb1, "");
@@ -261,11 +237,9 @@ public class Parser implements IParser{
 
 		while (matcher.find())
 		{
-			//System.out.println("matched number: "+matcher.group());
 			String[] allWords = matcher.group().toString().split(" ");
 			if(allWords.length==2)//fraction- add as is
 			{
-				//System.out.println("add as is: "+matcher.group() );
 				addToHash(terms_Hash,matcher.group());
 			}
 			else
@@ -292,25 +266,21 @@ public class Parser implements IParser{
 		match= upToThreeNubersAfterDot(match);
 		if( type == types.NUMBER_SMALLER_THAN_1K)
 		{
-			//System.out.println("less then 1k: "+match );
 			addToHash(termsHash,match);
 		}
 		else if(type == types.NUMBER_1K_TO_1M )
 		{
 			num=num/1000;
-			//System.out.println("NUMBER_1K_TO_1M: "+num.toString()+"K" );
 			addToHash(termsHash,num.toString()+"K");
 		}
 		else if(type == types.NUMBER_1M_TO_1B)
 		{
 			num=num/1000000;
-			//System.out.println("NUMBER_1M_TO_1B: "+String.format("%.3f", num)+"M" );
 			addToHash(termsHash,String.format("%.3f", num)+"M");
 		}
 		else if(type == types.NUMBER_GREATER_THAN_1B)
 		{
 			num=num/1000000000;
-			//System.out.println("NUMBER_GREATER_THAN_1B: "+String.format("%.3f", num)+"B" );
 			addToHash(termsHash,String.format("%.3f", num)+"B");
 		}
 	}
@@ -346,17 +316,14 @@ public class Parser implements IParser{
 
 			if(allWords.length==1)
 			{
-				//System.out.println("match dollar sign: "+ matcher.group());
 				addpatternDollarSignToHash(terms_Hash, match.substring(1,match.length()));
 			}
 			else if(allWords[1].equals("million"))
 			{
-				///System.out.println("match price milion: "+ matcher.group()+ " adding : " +allWords[0].substring(1)+" M Dollars" );
 				addToHash(terms_Hash,allWords[0].substring(1)+" M Dollars");
 			}
 			else//billion
 			{
-				//System.out.println("match price billion: "+matcher.group()+ " adding : " +(int)(getNumAsFloat(allWords[0].substring(1))*1000)+" M Dollars");
 				addToHash(terms_Hash,(int)(getNumAsFloat(allWords[0].substring(1))*1000)+" M Dollars");
 			}
 			matcher.appendReplacement(sb1, " ");
@@ -368,7 +335,6 @@ public class Parser implements IParser{
 		while (matcher.find())
 		{
 			String[] allWords = matcher.group().toString().split(" ");
-			//System.out.println("match patternPrice : "+ matcher.group());
 			String num= removeComma(allWords[0]);
 			if(allWords.length== 4)//Price billion U.S. dollars/Price million U.S. dollars/Price trillion U.S. dollars
 			{
@@ -376,23 +342,19 @@ public class Parser implements IParser{
 				{
 					case "billion":
 						addToHash(terms_Hash,num+"000 M Dollars");
-						//System.out.println("biliion!"+num+"000 M Dollars");
 						break;
 					case "million":
 						addToHash(terms_Hash,allWords[0]+" M Dollars");
-						//System.out.println("million!"+allWords[0]+" M Dollars");
 						break;
 					case "trillion":
 						addToHash(terms_Hash,num+"000000 M Dollars");
-						//System.out.println("trillion!"+num+"000000 M Dollars");
 						break;
 				}
 			}
-			else if(allWords.length== 3)//Price fraction Dollars(מתחת למיליון דולר)
+			else if(allWords.length== 3)//Price fraction Dollars
 			{
 				if( checkNumSize(allWords[0]).getKey() == types.NUMBER_1K_TO_1M ||checkNumSize(allWords[0]).getKey() == types.NUMBER_SMALLER_THAN_1K )
 				{
-					//System.out.println("add fraction as is!!"+matcher.group());
 					addToHash(terms_Hash,matcher.group());
 				}
 			}
@@ -430,18 +392,11 @@ public class Parser implements IParser{
 		float num=pair.getValue();
 		if( type == types.NUMBER_GREATER_THAN_1B || type == types.NUMBER_1M_TO_1B)
 		{
-			//System.out.println("adding: "+(int)(num/1000000)+" M Dollars");
 			addToHash(termsHash,(int)(num/1000000)+" M Dollars");
 		}
 		else if(type == types.NUMBER_1K_TO_1M || type == types.NUMBER_SMALLER_THAN_1K)
 		{
-			//System.out.println("adding: "+match.substring(0,match.length())+" Dollars");
 			addToHash(termsHash,match.substring(0,match.length())+" Dollars");
-		}
-		else
-		{
-			System.out.println("error type is:" + type.toString());
-
 		}
 	}
 
@@ -449,7 +404,6 @@ public class Parser implements IParser{
 	//output: add the match to the hash according to the instruction(Price m Dollars --> Price M Dollars)
 	void addpatternMDollarToHash(HashMap<String,Integer> termsHash,String match )
 	{
-		//System.out.println("add  m!!  "+match.substring(0,match.length()-1)+" M Dollars");
 		addToHash(termsHash,match.substring(0,match.length()-1)+" M Dollars");
 	}
 
@@ -457,7 +411,6 @@ public class Parser implements IParser{
 	//output: add the match to the hash according to the instruction(Price bn Dollars)
 	void addpatternBnDollarToHash(HashMap<String,Integer> termsHash,String match )
 	{
-		//System.out.println("add  bn!!  "+match.substring(0,match.length()-2)+"000 M Dollars");
 		addToHash(termsHash,match.substring(0,match.length()-2)+"000 M Dollars");
 	}
 
@@ -486,6 +439,8 @@ public class Parser implements IParser{
 		return num;
 	}
 
+	//input : hash and text
+	//looking for a Percent match, adding the matches to the hashMap according to instructions
 	StringBuffer parsePercent(HashMap<String,Integer> terms_Hash, StringBuffer doc_Text)
 	{
 		StringBuffer sb1 = new StringBuffer();
@@ -493,7 +448,6 @@ public class Parser implements IParser{
 		Matcher matcher  = patternPercent.matcher(doc_Text);
 		while (matcher.find())
 		{
-			//System.out.println("match percent: " + matcher.group());
 			int space= (matcher.group().contains(" ") == true)? 1:0;
 			if(matcher.group().endsWith("%"))//ends with %
 			{
@@ -516,6 +470,8 @@ public class Parser implements IParser{
 		return sb1;
 	}
 
+	//input : hash and text
+	//looking for a Date match, adding the matches to the hashMap
 	StringBuffer parseDate(HashMap<String,Integer> terms_Hash, StringBuffer doc_Text)
 	{
 		StringBuffer sb1 = new StringBuffer();
@@ -528,27 +484,20 @@ public class Parser implements IParser{
 			{
 				if((allWords.length==2 || allWords[2].length()<4) && allWords[0].length()==2)//DD Month
 				{
-					//System.out.println("adding date DD M :"+MonthToNum(allWords[1])+"-"+allWords[0] );
 					addToHash(terms_Hash,MonthToNum(allWords[1])+"-"+allWords[0]);
 				}
 				else if(allWords[1].length()==2)//Month DD
 				{
-					//System.out.println("adding date M DD :"+MonthToNum(allWords[0])+"-"+allWords[1] );
 					addToHash(terms_Hash,MonthToNum(allWords[0])+"-"+allWords[1]);
 				}
 				else if(allWords.length==2) //MonthYear
 				{
-					//System.out.println("adding date Year M :"+allWords[1].substring(0, 4)+"-"+MonthToNum(allWords[0]) );
 					addToHash(terms_Hash,allWords[1].substring(0, 4)+"-"+MonthToNum(allWords[0]));
 				}
 				else //full date- DD MM YY
 				{
-					//System.out.println("month::"+allWords[1]);
 					String month=MonthToNum(allWords[1]);
-					//System.out.println("adding date M DD :"+month+"-"+allWords[0] );
 					addToHash(terms_Hash,month+"-"+allWords[0]);
-
-					//System.out.println("adding date Year M :"+allWords[2].substring(0,4)+"-" +month);
 					addToHash(terms_Hash,allWords[2].substring(0,4)+"-" +month);
 				}
 			}
@@ -619,6 +568,8 @@ public class Parser implements IParser{
 		}
 	}
 
+	//input- string number
+	//output- pair- the number as a float and hes type from the enum
 	private Pair<types,Float> checkNumSize(String number)
 	{
 		types ret=types.UNDEFINED;
