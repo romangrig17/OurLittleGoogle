@@ -64,7 +64,7 @@ public class Parser implements IParser{
 
 		//System.out.println("******");
 		//System.out.println("start parseNames Date: " +LocalTime.now());
-		sb1=parseNames(termsHash,sb1);
+		sb1 = parseNames(termsHash,sb1);
 		//System.out.println("start parsePercent Date: " +LocalTime.now());
 		sb1=parsePercent(termsHash, sb1);
 		//System.out.println("start parseDate Date: " +LocalTime.now());
@@ -79,7 +79,6 @@ public class Parser implements IParser{
 		sb1=parseKG(termsHash,sb1);
 		//System.out.println("start parseNumbers Date: " +LocalTime.now());
 		sb1=parseNumbers(termsHash,sb1);
-
 		//System.out.println("start parseEndWords Date: " +LocalTime.now());
 		parseEndWords(termsHash,sb1);
 		//System.out.println("******");
@@ -93,18 +92,25 @@ public class Parser implements IParser{
 	//TODO- add as pattern
 	StringBuffer parsePhoneNumber(HashMap<String,Integer> terms_Hash, StringBuffer doc_Text)
 	{
-		StringBuffer sb1 = new StringBuffer() ;
-
+		StringBuffer sb1 = new StringBuffer();
 		Matcher matcher  = patternPhoneNumber.matcher(doc_Text);
+		boolean matched = false;
 		while (matcher.find())
 		{
+			matched = true;
 			//System.out.println("matched phone: "+ matcher.group());
 			addToHash(terms_Hash,matcher.group());
 			matcher.appendReplacement(sb1, "");
 		}
-		matcher.appendTail(sb1);
 
-		return sb1;
+		if (matched)
+		{
+			matcher.appendTail(sb1);
+			doc_Text.setLength(0);
+			return sb1;
+		}
+
+		return doc_Text;
 	}
 
 	//parseKG- input: stringBuffer of the text and hashMap to update
@@ -113,13 +119,21 @@ public class Parser implements IParser{
 	{
 		StringBuffer sb1 = new StringBuffer() ;
 		Matcher matcher  = patternKG.matcher(doc_Text);
+		boolean matched=false;
 		while (matcher.find())
 		{
+			matched=true;
 			addToHash(terms_Hash,matcher.group());
 			matcher.appendReplacement(sb1, "");
 		}
-		matcher.appendTail(sb1);
-		return sb1;
+		if(matched)
+		{
+			matcher.appendTail(sb1);
+			doc_Text.setLength(0);
+			return sb1;
+		}
+
+		return doc_Text;
 	}
 
 	//parseNames- input: stringBuffer of the text and hashMap to update
@@ -135,6 +149,7 @@ public class Parser implements IParser{
 		}
 		matcher.appendTail(sb1);
 
+		doc_Text.setLength(0);
 		return sb1;
 	}
 
@@ -158,6 +173,8 @@ public class Parser implements IParser{
 	    		//System.out.println("no end for: "+allWords[i] );
 	    	}*/
 		}
+
+		doc_Text.setLength(0);
 	}
 
 	//printHash- input: hashMap
@@ -193,8 +210,9 @@ public class Parser implements IParser{
 			addToHash(terms_Hash,matcher.group());
 			matcher.appendReplacement(sb1, " ");
 		}
+
 		matcher.appendTail(sb1);
-		matcher=patternBetweenNumberAndNumber.matcher(sb1);;
+		matcher=patternBetweenNumberAndNumber.matcher(sb1);
 		while (matcher.find())
 		{
 			String[] allWords = matcher.group().toString().split(" ");
@@ -204,15 +222,15 @@ public class Parser implements IParser{
 		}
 		matcher.appendTail(sb2);
 
-
-		return sb1;
+		sb1.setLength(0);
+		doc_Text.setLength(0);
+		return sb2;
 	}
 
 	//parseNumbers: input- hash and doc_text
 	//output: add the matched numbers to the hash table and returns the new text without the matches
 	StringBuffer parseNumbers(HashMap<String,Integer>terms_Hash, StringBuffer doc_Text)
 	{
-
 		StringBuffer sb1 = new StringBuffer();
 		StringBuffer sb2 = new StringBuffer();
 
@@ -240,7 +258,7 @@ public class Parser implements IParser{
 		matcher.appendTail(sb1);
 
 		matcher=patternNumbers.matcher(sb1);
-		sb2.setLength(0);
+
 		while (matcher.find())
 		{
 			//System.out.println("matched number: "+matcher.group());
@@ -257,6 +275,9 @@ public class Parser implements IParser{
 			matcher.appendReplacement(sb2, " ");
 		}
 		matcher.appendTail(sb2);
+
+		sb1.setLength(0);
+		doc_Text.setLength(0);
 
 		return sb2;
 	}
@@ -343,7 +364,6 @@ public class Parser implements IParser{
 
 		matcher.appendTail(sb1);
 
-		sb2.setLength(0);
 		matcher  = patternPrice.matcher(sb1);//Price fraction Dollars
 		while (matcher.find())
 		{
@@ -394,6 +414,9 @@ public class Parser implements IParser{
 			matcher.appendReplacement(sb2, " ");
 		}
 		matcher.appendTail(sb2);
+
+		sb1.setLength(0);
+		doc_Text.setLength(0);
 
 		return sb2;
 	}
@@ -479,7 +502,6 @@ public class Parser implements IParser{
 			else if(matcher.group().endsWith("percent"))//percent
 			{
 				addToHash(terms_Hash, matcher.group().substring(0, matcher.group().length()-space-"percent".length())+"%");
-
 			}
 			else//Percentage
 			{
@@ -488,6 +510,8 @@ public class Parser implements IParser{
 			matcher.appendReplacement(sb1, " ");
 		}
 		matcher.appendTail(sb1);
+
+		doc_Text.setLength(0);
 
 		return sb1;
 	}
@@ -533,6 +557,8 @@ public class Parser implements IParser{
 		}
 
 		matcher.appendTail(sb1);
+
+		doc_Text.setLength(0);
 
 		return sb1;
 	}

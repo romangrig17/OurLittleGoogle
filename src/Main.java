@@ -19,7 +19,7 @@ public class Main {
 //        Integer inw = (Math.abs(st2.toLowerCase().hashCode() % 2500));
 
         boolean stemming = true;
-        Manager manager = new Manager("C:\\My Little Project\\corpus\\corpus","C:\\My Little Project\\PostingFile",stemming);
+        Manager manager = new Manager("D:\\My Little Project\\corpus\\corpus","D:\\My Little Project\\PostingFile",stemming);
 
 
         long elapsedTime = System.currentTimeMillis() - start;

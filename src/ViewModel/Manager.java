@@ -24,7 +24,7 @@ public class Manager {
     StringBuilder docsInfo;
     int counterOfDocs = 0;
 
-    private static final int AMOUNT_OF_DOCS_IN_POSTING_FILE = 15000;
+    private static final int AMOUNT_OF_DOCS_IN_POSTING_FILE = 17000;
 
     public Manager() {
         super();
