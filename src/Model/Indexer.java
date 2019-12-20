@@ -152,12 +152,12 @@ public class Indexer {
                     //we got term with small letters and we got big letters in dictionary
                     if (dictionary.get(originalTerm.toUpperCase()).split(",")[2].equals(docName))
                     {
-                        Integer updateNumberOfTimesInAllCorpus = Integer.parseInt(splitedDic[0]) + listOfTerms.get(term);
+                        int updateNumberOfTimesInAllCorpus = Integer.parseInt(splitedDic[0]) + listOfTerms.get(term);
                         dictionary.put(originalTerm,updateNumberOfTimesInAllCorpus + "," + splitedDic[1] + "," +docName);
                         if (postingFile.containsKey(originalTerm.toUpperCase()))
                         {
-                            Integer amountBefore = postingFile.get(originalTerm.toUpperCase()).get(docName);
-                            Integer thisAmount = listOfTerms.get(term);
+                            int amountBefore = postingFile.get(originalTerm.toUpperCase()).get(docName);
+                            int thisAmount = listOfTerms.get(term);
                             HashMap infoDocs = postingFile.get(originalTerm.toUpperCase());
                             infoDocs.put(docName,amountBefore+thisAmount);
                             postingFile.put(originalTerm,infoDocs);
@@ -169,8 +169,8 @@ public class Indexer {
                     }
                     else
                     {
-                        Integer updateNumberOfTimesInAllCorpus = Integer.parseInt(splitedDic[0]) + listOfTerms.get(term);
-                        Integer updateNumberOfDocuments = (Integer.parseInt(splitedDic[1])) + 1;
+                        int updateNumberOfTimesInAllCorpus = Integer.parseInt(splitedDic[0]) + listOfTerms.get(term);
+                        int updateNumberOfDocuments = (Integer.parseInt(splitedDic[1])) + 1;
                         dictionary.put(originalTerm,updateNumberOfTimesInAllCorpus + "," + updateNumberOfDocuments + "," +docName);
                         if (postingFile.containsKey(originalTerm.toUpperCase()))
                         {

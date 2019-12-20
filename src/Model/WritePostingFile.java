@@ -75,7 +75,7 @@ public class WritePostingFile extends Thread {
      * @param postingFile - the posting file
      * @return -
      */
-    public boolean toWrite(HashMap<String, HashMap<String, Integer>> postingFile) {
+    private boolean toWrite(HashMap<String, HashMap<String, Integer>> postingFile) {
         //gets the terms that need to be written by them hashcode
         getPackages(postingFile, AMOUNT_OF_POSTING_FILES);
 
@@ -263,7 +263,7 @@ public class WritePostingFile extends Thread {
 
     /**
      * This function write each Entity which appeared more then one time
-     * @param dictionary
+     * @param dictionary - dictionary
      */
     public void writeTheEntity(HashMap<String,String> dictionary) {
         if (h_Entity.size() < 1) {
