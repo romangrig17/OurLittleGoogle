@@ -30,7 +30,6 @@ public class Indexer {
     {
         for (String term: listOfTerms.keySet())
         {
-            //only for now
             //check what we got from parser
             if (term.length() == 0|| term.charAt(0) == '['
                     || term.charAt(0) == ']' || term.charAt(0) == ')' || term.charAt(0) == ',' || term.charAt(0) == '"' ||
@@ -185,7 +184,7 @@ public class Indexer {
                         }
                     }
                     //if the term we got now with lower letters and we got with upper
-                    //need to update and dic
+                    //removing the terms with upper letters from dictionary and posting file
                     postingFile.remove(originalTerm.toUpperCase());
                     dictionary.remove(originalTerm.toUpperCase());
                 }
@@ -196,7 +195,6 @@ public class Indexer {
                 addToDictionary(originalTerm,listOfTerms.get(term),docName);
             }
         }// for
-        //System.out.println("Finish the posting file of: " + docName);
         return postingFile;
     }
 

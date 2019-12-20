@@ -11,11 +11,6 @@ public class Main {
        // long start = System.currentTimeMillis();
         GUI gui = new GUI();
 
-//        String st1 = "the";
-//        String st2 = "THE";
-//        Integer in1 = (Math.abs(st1.toLowerCase().hashCode() % 2500));
-//        Integer inw = (Math.abs(st2.toLowerCase().hashCode() % 2500));
-
 //        boolean stemming = true;
 //        Manager manager = new Manager();
 //        manager.setStemming(stemming);

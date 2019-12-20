@@ -29,6 +29,7 @@ public class WritePostingFile extends Thread {
     //amount of the posting files we write
     private static final int AMOUNT_OF_POSTING_FILES = 1000;
 
+    //initialization semaphores for each posting file
     private static HashMap<String, Semaphore> semaphoreHashMap;
     static {
         semaphoreHashMap = new HashMap<>();
@@ -58,12 +59,22 @@ public class WritePostingFile extends Thread {
         this.postingFile = postingFile;
     }
 
+    /**
+     * run function for the program
+     */
     @Override
     public void run() {
         toWrite(postingFile);
     }
 
-
+    /**
+     * Main function of the program
+     * for first this function sort all terms by them hash code to write all term with same hash code in one
+     * then the function check if he got this posting file or he need to make new one
+     * if he need to update the posting file - he send the terms with same hashcode to reader of posting file
+     * @param postingFile - the posting file
+     * @return -
+     */
     public boolean toWrite(HashMap<String, HashMap<String, Integer>> postingFile) {
         //gets the terms that need to be written by them hashcode
         getPackages(postingFile, AMOUNT_OF_POSTING_FILES);
@@ -108,6 +119,16 @@ public class WritePostingFile extends Thread {
     }
 
 
+    /**
+     * This function gets the text from the posting file
+     * if we find same term in posting file on disk and on memory - we will update the line and add to this line the new documents that term
+     * is appear there and number of appearance
+     * Also this function check if the term is written in disk in upper letters - so if we got with lower letters we will change the term
+     * @param pathToWrite - to where write the posting file
+     * @param nameOfPostingFile - the name of posting file
+     * @param hashOfTerms - hash set that got all terms with same hash code
+     * @return - the text after update from posting file
+     */
     private StringBuilder[] getTextFromFile(StringBuilder pathToWrite, String nameOfPostingFile, HashSet<String> hashOfTerms) {
         try {
             semaphoreHashMap.get(nameOfPostingFile).acquire();
@@ -167,20 +188,18 @@ public class WritePostingFile extends Thread {
             semaphoreHashMap.get(nameOfPostingFile).release();
             return infoPostingFile;
         } catch (Exception e) {
-            /**
-             * TODO: delete here tempForDebugger
-             */
-            StringBuilder tempForDebugger1 = pathToWrite;
-            String tempForDebugger2 = nameOfPostingFile;
             e.toString();
             return null;
         }
     }
 
+    /**
+     * write the text to posting file - used when we got this posting file
+     * @param path - where to write
+     * @param textInFile - the text to write
+     * @param termHashCode - the name of posting file
+     */
     private void updateThePostingFile(StringBuilder path, StringBuilder textInFile, String termHashCode) {
-        /**
-         * TODO:check what faster, update or delete and write new
-         */
         try {
             semaphoreHashMap.get(termHashCode).acquire();
             File file = new File(path.toString());
@@ -193,6 +212,12 @@ public class WritePostingFile extends Thread {
         }
     }
 
+    /**
+     * write the text to posting file - used when we write the posting file for the first time
+     * @param path - where to write
+     * @param textInFile - the text to write
+     * @param textName - the name of posting file
+     */
     private void writeToDiskNewTextFile(StringBuilder path, String textName, String textInFile) {
         try {
             semaphoreHashMap.get(textName).acquire();
@@ -203,7 +228,6 @@ public class WritePostingFile extends Thread {
             FileWriter writer = new FileWriter(file);
             writer.write(textInFile);
             writer.close();
-
             semaphoreHashMap.get(textName).release();
         } catch (Exception e) {
             System.out.println("Problem To Write The File: File Name13: " + textName + ", The Text: " + textInFile);
@@ -214,8 +238,7 @@ public class WritePostingFile extends Thread {
     //<editor-fold des="Entity">
 
     /**
-     * TODO: check this function when i get Entity
-     *
+     * This function adding all the Entity to hash map
      * @param postingFile - posting file that we have
      * @param term        - the NTT
      */
@@ -238,6 +261,10 @@ public class WritePostingFile extends Thread {
     }
 
 
+    /**
+     * This function write each Entity which appeared more then one time
+     * @param dictionary
+     */
     public void writeTheEntity(HashMap<String,String> dictionary) {
         if (h_Entity.size() < 1) {
             return;
@@ -256,7 +283,11 @@ public class WritePostingFile extends Thread {
         }
     }
 
-
+    /**
+     * Add all the text on Entity
+     * @param dictionary - the dictionary
+     * @return - text that we need to write
+     */
     private StringBuilder getStringForEntityFile(HashMap<String,String> dictionary) {
         StringBuilder entityFile = new StringBuilder();
         //delete each entity that appears only one time
@@ -302,8 +333,4 @@ public class WritePostingFile extends Thread {
         }
     }
 
-    public void changePath(StringBuilder newPath)
-    {
-        this.pathToWrite = newPath;
-    }
 }

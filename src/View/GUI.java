@@ -43,11 +43,10 @@ public class GUI {
          * to the panel.
          */
         placeComponents(panel);
-
-
+        
         // Setting the frame visibility to true
         frame.setVisible(true);
-
+        //initialization of manager
         this.manager = new Manager();
 
     }
@@ -80,8 +79,6 @@ public class GUI {
         JTextField outputText = new JTextField(20);
         outputText.setBounds(100,50,165,25);
         panel.add(outputText);
-
-        //setInputs(inputText.toString(),outputText.toString());
 
 
         JButton inputBrowseButton = new JButton("Browse");
@@ -234,11 +231,11 @@ public class GUI {
                 {
                     showMessageDialog(null, "The output path is empty! \n Please Browse a new path");
                 }
-                // TODO load dictionary action
 
             }
         });
 
+        // Creating start button
         JButton startButton = new JButton("Start!");
         startButton.setBounds(280,80,80,25);
         panel.add(startButton);
@@ -270,6 +267,7 @@ public class GUI {
 
     }
 
+    //<editor-fold des="Setters and Getters>"
     public void setOutputPath(String path)
     {
         this.outputPath = path;
@@ -295,6 +293,7 @@ public class GUI {
     {
         return stemming;
     }
+    //</editor-fold>
 }
 
 

@@ -10,11 +10,14 @@ public class WriteDictionary {
 
     String pathToWrite;
 
-    public WriteDictionary()
-    {
+    //Constructor
+    public WriteDictionary(){}
 
-    }
 
+    /**
+     * this function write the dictionary to disk
+     * @param dictionary - gets the dictionary we got
+     */
     public void run(HashMap<String, String> dictionary)
     {
         StringBuilder dictionaryToWrite = new StringBuilder();
@@ -32,6 +35,10 @@ public class WriteDictionary {
         }
     }
 
+    /**
+     * this function read the dictionary from the disk
+     * @return - dictionary
+     */
     public HashMap<String, String> loadDictionary()
     {
         HashMap<String,String> dictionary = new HashMap<>();
@@ -49,6 +56,12 @@ public class WriteDictionary {
         return dictionary;
     }
 
+    /**
+     * Setters
+     * @param path - path to write / read from
+     * @param stemming - what dictionary we want stemming
+     * @param needToChange - if we need to change the path
+     */
     public void setPathToWrite(String path,boolean stemming,boolean needToChange)
     {
         if (stemming && needToChange)

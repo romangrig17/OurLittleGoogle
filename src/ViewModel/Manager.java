@@ -19,7 +19,7 @@ public class Manager {
     WritePostingFile writePostingFile;
     WriteDictionary writeDictionary;
 
-
+    //variables
     String pathForPostingFile;
     String pathForCorpus;
     ArrayList<String> allFiles;
@@ -44,8 +44,6 @@ public class Manager {
         {
             this.pathForPostingFile = pathForPostingFile +"\\With Stemming";
             new File(pathForPostingFile).mkdirs();
-
-            //file.mkdir();
             writePostingFile = new WritePostingFile(new StringBuilder(pathForPostingFile));
         }
         else
@@ -68,33 +66,18 @@ public class Manager {
             Parser parser = new Parser();
             Iterator it = allTextsFromTheFile.keySet().iterator();
             for (String docID : allTextsFromTheFile.keySet()) {
-
-                /**
-                 * Here you do the Parse
-                 */
+                //parsing each doc
                 HashMap<String, Integer> listOfTerms = parser.parseDoc(allTextsFromTheFile.get(docID).toString(), docID);
-
-
-
-                /**
-                 * remove the stop words from the list of terms which we got from parser
-                 */
+                //remove the stop words from the list of terms which we got from parser
                 listOfTerms = stopWords.removeStopWords(listOfTerms);
-
-                /**
-                 * here is the stemming
-                 */
-                //<editor-fold> des="Stemming"
+                //do a stemming for each term in the doc except numbers
                 HashMap<String, Integer> listOfTermsAfterStemming = null;
                 if (stemming) {
                     Stemmer steaming = new Stemmer();
                     listOfTermsAfterStemming = steaming.Stemmer(listOfTerms);
                     listOfTerms = null;
                 }
-
-                /**
-                 * here you can delete - this indexing the files
-                 */
+                //manager send list of terms after/before stemming to indexer
                 if (listOfTermsAfterStemming == null) {
                     //getInfoOnDoc(listOfTerms, docID);
                     indexer.getPostingFileFromListOfTerms(listOfTerms, docID);
@@ -102,25 +85,17 @@ public class Manager {
                     //getInfoOnDoc(listOfTermsAfterStemming, docID);
                     indexer.getPostingFileFromListOfTerms(listOfTermsAfterStemming, docID);
                 }
-
-                /**
-                 * Here you can delete - this writing the files
-                 */
+                //make a batch of document in posting file, each batch written to disk
                 counterOfDocs++;
                 if (counterOfDocs == AMOUNT_OF_DOCS_IN_POSTING_FILE) {
                     counterOfDocs = 0;
                     writePostingFile.putPostingFile(indexer.getPostingFile());
                     threadPool.execute(writePostingFile);
-                    //System.out.println(Thread.activeCount());
-                    //writePostingFile.run();
                     indexer.initNewPostingFile();
                 }
-                //System.out.println("After one document");
             }
         }
-        //threadPool.shutdown();
-        //while (!threadPool.isTerminated()) {}
-        //if there is more unwritten files
+        //if there is more unwritten posting file
         if (counterOfDocs > 0)
         {
             writePostingFile.putPostingFile(indexer.getPostingFile());
@@ -130,17 +105,19 @@ public class Manager {
         threadPool.shutdown();
         while (!threadPool.isTerminated()) {}
 
-        //writing all the entity
+        //writing all the entity we got in corpus and check if the appear more then one time
         writePostingFile.writeTheEntity(indexer.getDictionary());
 
         //writing the dictionary to disk
         writeDictionary.setPathToWrite(pathForPostingFile,stemming,false);
         writeDictionary.run(indexer.getDictionary());
 
+        //sort the dictionary
         sortByTerms();
 
-        System.out.println("The amount of unique terms: " + indexer.getDictionary().size());
+        //System.out.println("The amount of unique terms: " + indexer.getDictionary().size());
 
+        //calculate the time for program
         long elapsedTime = System.currentTimeMillis() - start;
         double elapsedTimeD = (double) elapsedTime;
         System.out.println("The time of program: " + (elapsedTimeD/60000) + " Min");
@@ -191,7 +168,6 @@ public class Manager {
             sortedDictionary[i][1] = entry.getValue();
             i++;
         }
-        //System.out.println(sortedDictionary);
     }
 
     /**
@@ -229,8 +205,5 @@ public class Manager {
         this.pathForCorpus = path;
     }
     //</editor-fold>
-
-
-
 
 }
