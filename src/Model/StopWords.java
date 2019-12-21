@@ -30,7 +30,7 @@ public class StopWords {
             }
             br.close();
         } catch (Exception e) {
-            System.out.println("problem with the reading from file!! in: " + file.getPath());
+            System.out.println("problem with the reading from the stopwords file!! in: " + file.getPath());
         }
     }
 

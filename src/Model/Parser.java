@@ -1,5 +1,8 @@
 package Model;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.time.LocalTime;
 import java.util.regex.Pattern;
 
@@ -24,35 +27,34 @@ enum types
 public class Parser implements IParser{
 
 	//Percentage
-	Pattern patternPercent = Pattern.compile("[0-9]{1,}([\\.][0-9]{1,})?([ ]{1})?(percentage|percent|%)");//Number percent//Number percentage
+	Pattern patternPercent = Pattern.compile("[0-9]{1,}([\\.][0-9]{1,})?([ ]{1})?(percentage|percent|%)",Pattern.CASE_INSENSITIVE);//Number percent//Number percentage
 
 	//Date
-	Pattern patternDate = Pattern.compile("([0-3]{1}[0-9]{1}[ ])?(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)[ ]([0-3]{1}[0-9]{1}\\D|[1-2]{1}[0-9]{1}[0-9]{1}[0-9]{1}\\D)?");//DD Month//Month DD//Month year
+	Pattern patternDate = Pattern.compile("([0-3]{1}[0-9]{1}[ ])?(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)( [0-3]{1}[0-9]{3}| [0-2]{1}[0-9]{1})?",Pattern.CASE_INSENSITIVE);//DD Month//Month DD//Month year
 
+	
 	//Price
 	Pattern patternDollarSignBillionMillion = Pattern.compile("\\$(\\d{1,3},\\d{3}(,\\d{3})*)(\\.\\d*)?([ ](billion|million))?"
-			+ "|\\$\\d+\\.?\\d*([ ](billion|million))?");//$price billion/$price million
-	Pattern patternPrice = Pattern.compile("((\\d{1,3},\\d{3}(,\\d{3})*)(\\.\\[0-9]{1,})?|(\\d{1,})(\\.\\d{1,})?)( Dollars| dollars|m Dollars|bn Dollars| billion U.S. dollars| million U.S. dollars| trillion U.S. dollars)"
-			+"|((\\d{1,3},\\d{3}(,\\d{3})*)|(\\d{1,6}))( (\\d{1,}+\\/+\\d{1,}))?( Dollars| dollars)");
+			+ "|\\$\\d+\\.?\\d*([ ](billion|million))?",Pattern.CASE_INSENSITIVE);//$price billion/$price million
+	Pattern patternPrice = Pattern.compile("((\\d{1,3},\\d{3}(,\\d{3})*)(\\.\\[0-9]{1,})?|(\\d{1,})(\\.\\d{1,})?)( dollars|m dollars|bn dollars| billion U.S. dollars| million U.S. dollars| trillion U.S. dollars)"
+			+"|((\\d{1,3},\\d{3}(,\\d{3})*)|(\\d{1,6}))( (\\d{1,}+\\/+\\d{1,}))?( dollars)",Pattern.CASE_INSENSITIVE);
 
 	//expressions- (Word?)([-])?(number|word)[-](number|word)([-])?(word?)
-	Pattern patternExpression= Pattern.compile("([A-z]{1,}[-])?([A-z]{1,}|(\\d{1,3},\\d{3}(,\\d{3})*)(\\.\\d*)?|[0-9]{1,}([\\\\.][0-9]{1,})?)[-]([A-z]{1,}|(\\d{1,3},\\d{3}(,\\d{3})*)(\\.\\d*)?|[0-9]{1,}([\\\\.][0-9]{1,})?)([-][A-z]{1,})?"); //Word-word-word/Word-word/Number-word/Word-Number/Number-number
-	Pattern patternBetweenNumberAndNumber= Pattern.compile("(Between |between )\\d{1,}( and )\\d{1,}");//Between number and number
+	Pattern patternExpression= Pattern.compile("([A-Za-z]{2,}[-])?([A-Za-z]{2,}|(\\d{1,3},\\d{3}(,\\d{3})*)(\\.\\d*)?|[0-9]{1,}([\\.][0-9]{1,})?)[-]([A-Za-z]{2,}|(\\d{1,3},\\d{3}(,\\d{3})*)(\\.\\d*)?|[0-9]{1,}([\\.][0-9]{1,})?)([-][A-Za-z]{2,})?"); //Word-word-word/Word-word/Number-word/Word-Number/Number-number
+	Pattern patternBetweenNumberAndNumber= Pattern.compile("(between )\\d{1,}( and )\\d{1,}", Pattern.CASE_INSENSITIVE);//Between number and number
 
 	//numbers
-	Pattern patternNumbers = Pattern.compile("((\\d{1,3},\\d{3}(,\\d{3})*)|([0-9]{1,}))(([\\.][0-9]{1,})|( (\\d{1,}+\\/+\\d{1,})))?");//numbers-(with comma\just numbers\with dot) (fractions)?
-	Pattern patternNumbersThoMilBil = Pattern.compile("[0-9]{1,}([\\.][0-9]{1,})?([ ]{1,})(Thousand|Million|Billion)");
+	Pattern patternNumbers = Pattern.compile("((\\d{1,3},\\d{3}(,\\d{3})*)|([0-9]{1,}))(([\\.][0-9]{1,})|( (\\d{1,}+\\/+\\d{1,})))?( thousand| million| billion|( )?kg| kilogram)?",Pattern.CASE_INSENSITIVE);//numbers-(with comma\just numbers\with dot) (fractions)? /kg 
+	//Pattern patternNumbersThoMilBilKg = Pattern.compile("[0-9]{1,}([\\.][0-9]{1,})?( Thousand| Million| Billion|( )?KG|( )?kg|( )?Kg| kilogram)");//numbers and kilograms
 
 	//Names
 	Pattern patternEntity= Pattern.compile("[A-Z]{1}[a-z]{1,}[ ][A-Z]{1,}[a-z]{1,}([ |-][A-Z]{1}[a-z]{1,}([ |-][A-Z]{1,}[a-z]{1,})?)?");
-
-	//KG
-	Pattern patternKG= Pattern.compile("[0-9]{1,}([\\.][0-9]{1,})?([ ])?(KG|kg|Kg|kilogram)");
 
 	//phone number
 	Pattern patternPhoneNumber= Pattern.compile("([(])?[0-9]{3}(-| )[0-9]{3}(-| )?[0-9]{4}([)])?");
 
 
+	DecimalFormat decimalFormat = new DecimalFormat("###.###");
 
 	//This function parse the input doc_text.
 	//The output is a hashMap of all the parsed words:
@@ -68,10 +70,10 @@ public class Parser implements IParser{
 		sb1=parsePrices(termsHash,sb1);
 		sb1=parsePhoneNumber(termsHash,sb1);
 		sb1=parseExpressions(termsHash,sb1);
-		sb1=parseKG(termsHash,sb1);
+		//sb1=parseKG(termsHash,sb1);
 		sb1=parseNumbers(termsHash,sb1);
 		parseEndWords(termsHash,sb1);
-		//printHash(termsHash);
+		printHash(termsHash);
 
 		return termsHash;
 	}
@@ -88,7 +90,7 @@ public class Parser implements IParser{
 		{
 			matched = true;
 			addToHash(terms_Hash,matcher.group());
-			matcher.appendReplacement(sb1, "");
+			matcher.appendReplacement(sb1, " ");
 		}
 
 		if (matched)
@@ -100,7 +102,7 @@ public class Parser implements IParser{
 
 		return doc_Text;
 	}
-
+/*
 	//parseKG- input: stringBuffer of the text and hashMap to update
 	//output:the new string buffer without the matches+ updates the the hash with the matched kilograms
 	StringBuffer parseKG(HashMap<String,Integer> terms_Hash, StringBuffer doc_Text)
@@ -123,7 +125,7 @@ public class Parser implements IParser{
 
 		return doc_Text;
 	}
-
+*/
 	//parseNames- input: stringBuffer of the text and hashMap to update
 	//output StringBuffer without the terms and  updates the the hash with the matched names and entities
 	StringBuffer parseNames(HashMap<String,Integer> terms_Hash, StringBuffer doc_Text)
@@ -133,7 +135,7 @@ public class Parser implements IParser{
 		while (matcher.find())
 		{
 			addToHash(terms_Hash,"!"+matcher.group());
-			matcher.appendReplacement(sb1, "");
+			matcher.appendReplacement(sb1, " ");
 		}
 		matcher.appendTail(sb1);
 
@@ -196,8 +198,10 @@ public class Parser implements IParser{
 		while (matcher.find())
 		{
 			String[] allWords = matcher.group().toString().split(" ");
+			addToHash(terms_Hash, matcher.group());
 			addToHash(terms_Hash,allWords[1]);
 			addToHash(terms_Hash,allWords[3]);
+			matcher.appendReplacement(sb1, " ");
 		}
 		matcher.appendTail(sb2);
 
@@ -212,39 +216,55 @@ public class Parser implements IParser{
 	{
 		StringBuffer sb1 = new StringBuffer();
 		StringBuffer sb2 = new StringBuffer();
+		Matcher matcher=patternNumbers.matcher(doc_Text);
 
-		Matcher matcher=patternNumbersThoMilBil.matcher(doc_Text);
-		while (matcher.find())
+		while (matcher.find())//( Thousand| Million| Billion|( )?KG|( )?kg| kilogram)
 		{
 			String[] allWords = matcher.group().toString().split(" ");
-			if(allWords[1].equals("Thousand"))
+			if(allWords.length == 1)
 			{
-				addToHash(terms_Hash,allWords[0]+"K");
-			}
-			else if(allWords[1].equals("Million"))
-			{
-				addToHash(terms_Hash,allWords[0]+"M");
-			}
-			else
-			{
-				addToHash(terms_Hash,allWords[0]+"B");
-			}
-			matcher.appendReplacement(sb1, "");
-		}
-		matcher.appendTail(sb1);
+				if (allWords[0].toLowerCase().contains("kg"))
+				{
+					addToHash(terms_Hash,allWords[0].substring(0, allWords[0].length()-2)+"kg");//kg
+				}
+				else
+				{
+					addpatternNumbersToHash(terms_Hash,allWords[0]);//number					
+				}
 
-		matcher=patternNumbers.matcher(sb1);
-
-		while (matcher.find())
-		{
-			String[] allWords = matcher.group().toString().split(" ");
-			if(allWords.length==2)//fraction- add as is
-			{
-				addToHash(terms_Hash,matcher.group());
 			}
-			else
+			else if(allWords.length == 2)//n fraction- add as is/n Thousand/n Million/n Billion/n kg/n kilogram
 			{
-				addpatternNumbersToHash(terms_Hash,matcher.group());
+				if(allWords[1].equalsIgnoreCase("thousand"))
+				{
+					//System.out.println("match Thousand: "+matcher.group());
+					addToHash(terms_Hash,allWords[0]+"K");
+				}
+				else if(allWords[1].equalsIgnoreCase("million"))
+				{
+					//System.out.println("match Million: "+matcher.group());
+					addToHash(terms_Hash,allWords[0]+"M");
+				}
+				else if (allWords[1].equalsIgnoreCase("billion"))
+				{
+					//System.out.println("match Billion: "+matcher.group());
+					addToHash(terms_Hash,allWords[0]+"B");
+				}
+				else if (allWords[1].equalsIgnoreCase("kilogram") | allWords[1].equalsIgnoreCase("kg"))//kg|kilogram
+				{
+					//System.out.println("match kg: "+matcher.group());
+					addToHash(terms_Hash,allWords[0]+"kg");				
+				}
+				else//fraction
+				{
+					//System.out.println("match num: "+matcher.group());
+					addToHash(terms_Hash,matcher.group());					
+				}
+
+			}
+			else //n fraction Thousand/n fraction Million/n fraction Billion/n fraction KG/n fraction kg/n fraction Kg/n fraction kilogram ??
+			{
+				System.out.println("match 3 ??: "+matcher.group());
 			}
 			matcher.appendReplacement(sb2, " ");
 		}
@@ -270,8 +290,11 @@ public class Parser implements IParser{
 		}
 		else if(type == types.NUMBER_1K_TO_1M )
 		{
-			num=num/1000;
-			addToHash(termsHash,num.toString()+"K");
+			match=removeComma(match);
+			BigDecimal number= new BigDecimal(match);
+			number=number.divide(new BigDecimal(1000)).setScale(3, RoundingMode.DOWN);
+			addToHash(termsHash,number.toString()+"K");
+			
 		}
 		else if(type == types.NUMBER_1M_TO_1B)
 		{
@@ -318,7 +341,7 @@ public class Parser implements IParser{
 			{
 				addpatternDollarSignToHash(terms_Hash, match.substring(1,match.length()));
 			}
-			else if(allWords[1].equals("million"))
+			else if(allWords[1].equalsIgnoreCase("million"))
 			{
 				addToHash(terms_Hash,allWords[0].substring(1)+" M Dollars");
 			}
@@ -360,11 +383,11 @@ public class Parser implements IParser{
 			}
 			else if(allWords.length== 2)//Price[m] Dollars/Price[bn] Dollars/Price Dollars(more+less than million dollar )
 			{
-				if(allWords[0].endsWith("m"))
+				if(allWords[0].toLowerCase().endsWith("m"))
 				{
 					addpatternMDollarToHash(terms_Hash,allWords[0]);
 				}
-				else if(allWords[0].endsWith("bn"))
+				else if(allWords[0].toLowerCase().endsWith("bn"))
 				{
 					addpatternBnDollarToHash(terms_Hash,allWords[0]);
 				}
@@ -396,7 +419,7 @@ public class Parser implements IParser{
 		}
 		else if(type == types.NUMBER_1K_TO_1M || type == types.NUMBER_SMALLER_THAN_1K)
 		{
-			addToHash(termsHash,match.substring(0,match.length())+" Dollars");
+			addToHash(termsHash,match+" Dollars");
 		}
 	}
 
@@ -453,7 +476,7 @@ public class Parser implements IParser{
 			{
 				addToHash(terms_Hash, matcher.group().substring(0, matcher.group().length()-space-1)+"%");
 			}
-			else if(matcher.group().endsWith("percent"))//percent
+			else if(matcher.group().toLowerCase().endsWith("percent"))//percent
 			{
 				addToHash(terms_Hash, matcher.group().substring(0, matcher.group().length()-space-"percent".length())+"%");
 			}
@@ -480,9 +503,9 @@ public class Parser implements IParser{
 		while (matcher.find())
 		{
 			String[] allWords = matcher.group().toString().split(" ");
-			if(allWords.length>2)
+			if(allWords.length>1)
 			{
-				if((allWords.length==2 || allWords[2].length()<4) && allWords[0].length()==2)//DD Month
+				if(allWords.length==2 && allWords[0].length()==2 || (allWords.length==3 && allWords[2].length()<4 ))//DD Month
 				{
 					addToHash(terms_Hash,MonthToNum(allWords[1])+"-"+allWords[0]);
 				}
@@ -490,7 +513,7 @@ public class Parser implements IParser{
 				{
 					addToHash(terms_Hash,MonthToNum(allWords[0])+"-"+allWords[1]);
 				}
-				else if(allWords.length==2) //MonthYear
+				else if(allWords.length==2) //Month Year
 				{
 					addToHash(terms_Hash,allWords[1].substring(0, 4)+"-"+MonthToNum(allWords[0]));
 				}
@@ -502,7 +525,7 @@ public class Parser implements IParser{
 				}
 			}
 
-			matcher.appendReplacement(sb1, " ");
+			//matcher.appendReplacement(sb1, " ");
 		}
 
 		matcher.appendTail(sb1);
@@ -514,42 +537,42 @@ public class Parser implements IParser{
 
 	String MonthToNum(String month)
 	{
-		switch (month)
+		switch (month.toLowerCase())
 		{
-			case "Jan":
-			case "January":
+			case "jan":
+			case "january":
 				return "01";
-			case "Feb":
-			case "February":
+			case "feb":
+			case "february":
 				return "02";
-			case "Mar":
-			case "March":
+			case "mar":
+			case "march":
 				return "03";
-			case "Apr":
-			case "April":
+			case "apr":
+			case "april":
 				return "04";
-			case "May":
+			case "may":
 				return "05";
-			case "Jun":
-			case "Jane":
+			case "jun":
+			case "june":
 				return "06";
-			case "Jul":
-			case "July":
+			case "jul":
+			case "july":
 				return "07";
-			case "Aug":
-			case "August":
+			case "aug":
+			case "august":
 				return "08";
-			case "Sep":
-			case "September":
+			case "sep":
+			case "september":
 				return "09";
-			case "Oct":
-			case "October":
+			case "oct":
+			case "october":
 				return "10";
-			case "Nov":
-			case "November":
+			case "nov":
+			case "november":
 				return "11";
-			case "Dec":
-			case "December":
+			case "dec":
+			case "december":
 				return "12";
 		}
 
