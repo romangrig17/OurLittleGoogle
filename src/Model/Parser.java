@@ -594,9 +594,9 @@ public class Parser implements IParser{
 					addToHash(terms_Hash,month+"-"+allWords[0]);
 					addToHash(terms_Hash,allWords[2].substring(0,4)+"-" +month);
 				}
+				matcher.appendReplacement(sb1, " ");
 			}
 
-			//matcher.appendReplacement(sb1, " ");
 		}
 
 		matcher.appendTail(sb1);
