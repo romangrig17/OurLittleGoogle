@@ -2,6 +2,8 @@ package Model;
 
 import java.util.*;
 
+import javafx.util.Pair;
+
 public class Indexer {
 
     //<editor-fold des="fields">
@@ -26,130 +28,152 @@ public class Indexer {
         this.postingFile = new HashMap<>();
     }
 
+    /**
+     * if the word is in dictionary with big/small letters
+     * we will check first if the word is with small letters - and if it does we will change the dictionary and posting to small letters!
+     * we will add this word - (with the small letters) to dictionary and check if it is the same document
+     */
     public HashMap<String, HashMap<String, Integer>> getPostingFileFromListOfTerms(HashMap<String, Integer> listOfTerms, String docName) {
-        for (String term : listOfTerms.keySet()) {
-            //check what we got from parser TODO remove
-            /*if (term.length() == 0 || term.charAt(0) == '['
-                    || term.charAt(0) == ']' || term.charAt(0) == ')' || term.charAt(0) == ',' || term.charAt(0) == '"' ||
-                    term.charAt(0) == '\'' || term.charAt(0) == '`' || term.charAt(0) == '_' || term.charAt(0) == ' ') {
-                System.out.println(" how!! : "+ term);
-            }*/
-            //make all the term with upper letters if the first letter is upper
-            String originalTerm = term;
-            boolean ifTheWordIsWithUpperLetters = false;
-            if (originalTerm.charAt(0) >= 'A' && originalTerm.charAt(0) <= 'Z' && (originalTerm.charAt(0) != '!')) {
-                originalTerm = originalTerm.toUpperCase();
-                ifTheWordIsWithUpperLetters = true;
-            } else if (originalTerm.charAt(0) >= 'a' && originalTerm.charAt(0) <= 'z' && (originalTerm.charAt(0) != '!')) {
-                originalTerm = originalTerm.toLowerCase();
-            } else if (originalTerm.charAt(0) >= '0' && originalTerm.charAt(0) <= '9' && originalTerm.contains("-")) {
-                //number - word
-                int indexOfChar = originalTerm.indexOf('-');
-                if (originalTerm.charAt(indexOfChar + 1) >= 'A' || originalTerm.charAt(indexOfChar + 1) <= 'Z') {
-                    originalTerm = originalTerm.toUpperCase();
-                } else {
-                    originalTerm = originalTerm.toLowerCase();
+    	boolean ifTheWordIsWithUpperLetters;
+    	String[] splitedDic;
+    	String originalTermToUpper,originalTermToLower,originalTerm;
+    	Pair<String,Boolean> updateOrig;
+        for (String term : listOfTerms.keySet()) 
+        {
+            ifTheWordIsWithUpperLetters = false;
+            originalTermToUpper=term.toUpperCase();
+            originalTermToLower=term.toLowerCase();
+            
+            updateOrig= updateOriginalTerm(term);
+            originalTerm=updateOrig.getKey();
+            ifTheWordIsWithUpperLetters=updateOrig.getValue();
+            Integer updateNumberOfDocuments,updateNumberOfTimesInAllCorpus;
+            if (dictionary.containsKey(originalTermToLower))//dictionary contains term in lower case
+            {
+                splitedDic = dictionary.get(originalTermToLower).split(",");
+                if (dictionary.get(originalTermToLower).split(",")[2].equals(docName))//dictionary contains term in lower case + the word is with upper case + prev doc containing is this doc
+                {  //if its the same document
+                	addExistingWordToPostingExistingFile(originalTermToLower,listOfTerms.get(term),splitedDic[0],splitedDic[1],docName);
+                } 
+                else //new doc containing this term
+                {
+                	addExistingWordToPostingFileNewFile(originalTermToLower,listOfTerms.get(term),splitedDic[0],splitedDic[1],docName);
                 }
             }
-
-            if (dictionary.containsKey(originalTerm.toLowerCase())) {
-                String[] splitedDic = dictionary.get(originalTerm.toLowerCase()).split(",");
-                /**
-                 * if the term is in dictionary with small letters
-                 * we will add this word - (with the small letters) to dictionary and check if it is the same document
-                 */
-                if (ifTheWordIsWithUpperLetters) {
-                    //the term is with upper letters and we got in the dictionary the same term with low letters
-                    //need to update the dictionary - if its a same document or not but the same word
-                    //update the posting file to - with the lower letters! only add this to posting
-                    if (dictionary.get(originalTerm.toLowerCase()).split(",")[2].equals(docName)) {
-                        //if its the same document
-                        Integer updateNumberOfTimesInAllCorpus = Integer.parseInt(splitedDic[0]) + listOfTerms.get(term);
-                        dictionary.put(originalTerm.toLowerCase(), updateNumberOfTimesInAllCorpus + "," + splitedDic[1] + "," + docName);
-                        //if dictionary do not contains posting file for sure!
-                        if (postingFile.containsKey(originalTerm.toLowerCase())) {
-                            updatePostingFileIfSameFile(originalTerm.toLowerCase(), docName, listOfTerms.get(term));
-                        } else {
-                            addToPostingFile(originalTerm.toLowerCase(), docName, listOfTerms.get(term));
-                        }
-                    } else {
-                        Integer updateNumberOfTimesInAllCorpus = Integer.parseInt(splitedDic[0]) + listOfTerms.get(term);
-                        Integer updateNumberOfDocuments = (Integer.parseInt(splitedDic[1])) + 1;
-                        dictionary.put(originalTerm.toLowerCase(), updateNumberOfTimesInAllCorpus + "," + updateNumberOfDocuments + "," + docName);
-                        if (postingFile.containsKey(originalTerm.toLowerCase())) {
-                            updatePostingFileIfNewFile(originalTerm.toLowerCase(), docName, listOfTerms.get(term));
-                        } else {
-                            addToPostingFile(originalTerm.toLowerCase(), docName, listOfTerms.get(term));
-                        }
-                    }
-                } else
-                //if the term we got was is low letters and we got him with low letters - first time in the doc
+            else if (dictionary.containsKey(originalTermToUpper)) //dictionary contains term in upper case
+            {
+                splitedDic = dictionary.get(originalTermToUpper).split(",");
+                if (ifTheWordIsWithUpperLetters) //we got term with upper case
                 {
-                    Integer updateNumberOfTimesInAllCorpus = (Integer.parseInt(splitedDic[0])) + listOfTerms.get(term);
-                    Integer updateNumberOfDocuments = (Integer.parseInt(splitedDic[1])) + 1;
-                    dictionary.put(originalTerm.toUpperCase(), updateNumberOfTimesInAllCorpus + "," + updateNumberOfDocuments + "," + docName);
-                    //we got the term with lower letters
-                    //only need to update the dictionary and add to posting file!
-                    if (postingFile.containsKey(originalTerm.toLowerCase())) {
-                        updatePostingFileIfNewFile(originalTerm.toLowerCase(), docName, listOfTerms.get(term));
-                    } else {
-                        addToPostingFile(originalTerm.toLowerCase(), docName, listOfTerms.get(term));
+                    if (dictionary.get(originalTermToUpper).split(",")[2].equals(docName))//dictionary contains term in upper case + the word is with upper case 
+                    {  //if its the same document
+                    	addExistingWordToPostingExistingFile(originalTermToUpper,listOfTerms.get(term),splitedDic[0],splitedDic[1],docName);
+                    } 
+                    else //new doc containing this term
+                    {
+                    	addExistingWordToPostingFileNewFile(originalTermToUpper,listOfTerms.get(term),splitedDic[0],splitedDic[1],docName);
                     }
                 }
-            } else if (dictionary.containsKey(originalTerm.toUpperCase())) {
-                /**
-                 * if the word is in dictionary with big letters
-                 * we will check first if the word is with small letters - and if it does we will change the dictionary and posting to small letters!
-                 * we will add this word - (with the small letters) to dictionary and check if it is the same document
-                 */
-                String[] splitedDic = dictionary.get(originalTerm.toUpperCase()).split(",");
-                if (ifTheWordIsWithUpperLetters) {
-                    //if the word in dictionary was with upper letters and we got with upper letters too - new doc!
-                    Integer updateNumberOfTimesInAllCorpus = Integer.parseInt(splitedDic[0]) + listOfTerms.get(term);
-                    Integer updateNumberOfDocuments = (Integer.parseInt(splitedDic[1])) + 1;
-                    dictionary.put(originalTerm, updateNumberOfTimesInAllCorpus + "," + updateNumberOfDocuments + "," + docName);
-                    if (postingFile.containsKey(originalTerm)) {
-                        updatePostingFileIfNewFile(originalTerm, docName, listOfTerms.get(term));
-                    } else {
-                        addToPostingFile(originalTerm, docName, listOfTerms.get(term));
-                    }
-                } else {
-                    //we got term with small letters and we got big letters in dictionary
-                    if (dictionary.get(originalTerm.toUpperCase()).split(",")[2].equals(docName)) {
-                        int updateNumberOfTimesInAllCorpus = Integer.parseInt(splitedDic[0]) + listOfTerms.get(term);
-                        dictionary.put(originalTerm, updateNumberOfTimesInAllCorpus + "," + splitedDic[1] + "," + docName);
-                        if (postingFile.containsKey(originalTerm.toUpperCase())) {
-                            int amountBefore = postingFile.get(originalTerm.toUpperCase()).get(docName);
+                else  //we got term with lower letters
+                {
+                	if (postingFile.containsKey(originalTermToUpper))
+                	{
+                        updateNumberOfTimesInAllCorpus = Integer.parseInt(splitedDic[0]) + listOfTerms.get(term);
+                        HashMap infoDocs = postingFile.get(originalTermToUpper);
+                        if (dictionary.get(originalTermToUpper).split(",")[2].equals(docName))
+                        {
+                            dictionary.put(originalTermToLower, updateNumberOfTimesInAllCorpus + "," + splitedDic[1] + "," + docName);
+                            int amountBefore = postingFile.get(originalTermToUpper).get(docName);
                             int thisAmount = listOfTerms.get(term);
-                            HashMap infoDocs = postingFile.get(originalTerm.toUpperCase());
                             infoDocs.put(docName, amountBefore + thisAmount);
-                            postingFile.put(originalTerm, infoDocs);
-                        } else {
-                            addToPostingFile(originalTerm, docName, listOfTerms.get(term));
-                        }
-                    } else {
-                        int updateNumberOfTimesInAllCorpus = Integer.parseInt(splitedDic[0]) + listOfTerms.get(term);
-                        int updateNumberOfDocuments = (Integer.parseInt(splitedDic[1])) + 1;
-                        dictionary.put(originalTerm, updateNumberOfTimesInAllCorpus + "," + updateNumberOfDocuments + "," + docName);
-                        if (postingFile.containsKey(originalTerm.toUpperCase())) {
-                            HashMap infoDocs = postingFile.get(originalTerm.toUpperCase());
+                            postingFile.put(originalTermToLower, infoDocs);
+                        } 
+                        else
+                        {
+                            updateNumberOfDocuments = (Integer.parseInt(splitedDic[1])) + 1;
+                            dictionary.put(originalTermToLower, updateNumberOfTimesInAllCorpus + "," + updateNumberOfDocuments + "," + docName);
                             infoDocs.put(docName, listOfTerms.get(term));
-                            postingFile.put(originalTerm, infoDocs);
-                        } else {
-                            addToPostingFile(originalTerm, docName, listOfTerms.get(term));
+                            postingFile.put(originalTermToLower, infoDocs);
                         }
-                    }
+                	}
+                	else
+                	{
+                		addToPostingFile(originalTermToLower, docName, listOfTerms.get(term));
+                	}       	
+             
                     //if the term we got now with lower letters and we got with upper
                     //removing the terms with upper letters from dictionary and posting file
-                    postingFile.remove(originalTerm.toUpperCase());
-                    dictionary.remove(originalTerm.toUpperCase());
+                    postingFile.remove(originalTermToUpper);
+                    dictionary.remove(originalTermToUpper);
                 }
-            } else {
-                //if we see the term for the first time
+            }
+            else //if we see the term for the first time
+            {
                 addToDictionary(originalTerm, listOfTerms.get(term), docName);
             }
-        }// for
+        }
+
         return postingFile;
+    }
+    
+
+    Pair<String,Boolean> updateOriginalTerm(String originalTerm)
+    {
+    	boolean ifTheWordIsWithUpperLetters=false;
+        if (originalTerm.charAt(0) >= 'A' && originalTerm.charAt(0) <= 'Z' && (originalTerm.charAt(0) != '!'))//make all the term with upper letters if the first letter is upper
+        {
+            originalTerm = originalTerm.toUpperCase();
+            ifTheWordIsWithUpperLetters = true;
+        }
+        else if (originalTerm.charAt(0) >= 'a' && originalTerm.charAt(0) <= 'z' && (originalTerm.charAt(0) != '!')) 
+        {
+            originalTerm = originalTerm.toLowerCase();
+        } 
+        else if (originalTerm.charAt(0) >= '0' && originalTerm.charAt(0) <= '9' && originalTerm.contains("-"))
+        {
+            //number - word
+            int indexOfChar = originalTerm.indexOf('-');
+            if (originalTerm.charAt(indexOfChar + 1) >= 'A' || originalTerm.charAt(indexOfChar + 1) <= 'Z') {
+                originalTerm = originalTerm.toUpperCase();
+            } else {
+                originalTerm = originalTerm.toLowerCase();
+            }
+        }
+        
+        return new Pair<String,Boolean>(originalTerm,ifTheWordIsWithUpperLetters);
+    	
+    }
+    
+    void addExistingWordToPostingFileNewFile(String termToAdd, Integer timesToAdd, String prevCountOfTimes, String prevCountOfDocs,String docName)
+    {
+        //if the word in dictionary was with upper/lower letters and we got with upper/lower letters too - new doc  
+        Integer updateNumberOfTimesInAllCorpus = Integer.parseInt(prevCountOfTimes) + timesToAdd;
+        Integer updateNumberOfDocuments = (Integer.parseInt(prevCountOfDocs)) + 1;//new file
+        dictionary.put(termToAdd, updateNumberOfTimesInAllCorpus + "," + updateNumberOfDocuments + "," + docName);
+        if (postingFile.containsKey(termToAdd))
+        {
+            updatePostingFileIfNewFile(termToAdd, docName, timesToAdd);
+        }
+        else
+        {
+            addToPostingFile(termToAdd, docName, timesToAdd);
+        }
+    }
+    
+    void addExistingWordToPostingExistingFile(String termToAdd, Integer timesToAdd, String prevCountOfTimes, String prevCountOfDocs,String docName)
+    {
+        //if the word in dictionary was with upper/lower letters and we got with upper/lower letters too - new doc apearence 
+        Integer updateNumberOfTimesInAllCorpus = Integer.parseInt(prevCountOfTimes) + timesToAdd;
+        Integer updateNumberOfDocuments = (Integer.parseInt(prevCountOfDocs));
+        dictionary.put(termToAdd, updateNumberOfTimesInAllCorpus + "," + updateNumberOfDocuments + "," + docName);
+        if (postingFile.containsKey(termToAdd))
+        {
+            updatePostingFileIfNewFile(termToAdd, docName, timesToAdd);
+        }
+        else
+        {
+            addToPostingFile(termToAdd, docName, timesToAdd);
+        }
     }
 
 
