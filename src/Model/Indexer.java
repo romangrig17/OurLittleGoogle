@@ -29,11 +29,11 @@ public class Indexer {
     public HashMap<String, HashMap<String, Integer>> getPostingFileFromListOfTerms(HashMap<String, Integer> listOfTerms, String docName) {
         for (String term : listOfTerms.keySet()) {
             //check what we got from parser TODO remove
-            if (term.length() == 0 || term.charAt(0) == '['
+            /*if (term.length() == 0 || term.charAt(0) == '['
                     || term.charAt(0) == ']' || term.charAt(0) == ')' || term.charAt(0) == ',' || term.charAt(0) == '"' ||
                     term.charAt(0) == '\'' || term.charAt(0) == '`' || term.charAt(0) == '_' || term.charAt(0) == ' ') {
                 System.out.println(" how!! : "+ term);
-            }
+            }*/
             //make all the term with upper letters if the first letter is upper
             String originalTerm = term;
             boolean ifTheWordIsWithUpperLetters = false;

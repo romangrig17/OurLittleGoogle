@@ -16,6 +16,7 @@ public class Manager {
     Indexer indexer;
     WritePostingFile writePostingFile;
     WriteDictionary writeDictionary;
+    Parser parser;
 
     //variables
     String pathForPostingFile;
@@ -37,7 +38,7 @@ public class Manager {
         docsInfo = new StringBuilder();
         fileReader = new ReadFile(pathForCorpus);
         allFiles = fileReader.getAllFiles();
-        this.pathForPostingFile = pathForPostingFile;
+        //this.pathForPostingFile = pathForPostingFile;
         if (stemming) {
             this.pathForPostingFile = pathForPostingFile + "\\With Stemming";
             new File(pathForPostingFile).mkdirs();
@@ -48,22 +49,21 @@ public class Manager {
             file.mkdir();
             writePostingFile = new WritePostingFile(pathForPostingFile);
         }
-        StopWords stopWords = new StopWords(pathForCorpus);
+        parser = new Parser(pathForCorpus,stemming);
         // create a pool of threads, 5 max jobs will execute in parallel
         ExecutorService threadPool = Executors.newFixedThreadPool(5);
         //run on all files
         long start = System.currentTimeMillis();
         for (String file : allFiles) {
             HashMap<String, StringBuilder> allTextsFromTheFile = fileReader.getTextsFromTheFile(new File(file));
-            Parser parser = new Parser();
             for (String docID : allTextsFromTheFile.keySet()) {
                 //parsing each doc
                 HashMap<String, Integer> listOfTerms = parser.parseDoc(allTextsFromTheFile.get(docID).toString(), docID);
                 //remove the stop words from the list of terms which we got from parser
-                listOfTerms = stopWords.removeStopWords(listOfTerms);
+                //listOfTerms = stopWords.removeStopWords(listOfTerms);
                 //do a stemming for each term in the doc except numbers
-                HashMap<String, Integer> listOfTermsAfterStemming = null;
-                if (stemming) {
+               // HashMap<String, Integer> listOfTermsAfterStemming = null;
+                /*if (stemming) {
                     Stemmer steaming = new Stemmer();
                     listOfTermsAfterStemming = steaming.Stemmer(listOfTerms);
                     listOfTerms = null;
@@ -72,10 +72,10 @@ public class Manager {
                 if (listOfTermsAfterStemming == null) {
                     //getInfoOnDoc(listOfTerms, docID);
                     indexer.getPostingFileFromListOfTerms(listOfTerms, docID);
-                } else {
+                } else {*/
                     //getInfoOnDoc(listOfTermsAfterStemming, docID);
-                    indexer.getPostingFileFromListOfTerms(listOfTermsAfterStemming, docID);
-                }
+                    indexer.getPostingFileFromListOfTerms(listOfTerms, docID);
+           
                 //make a batch of document in posting file, each batch written to disk
                 counterOfDocs++;
                 if (counterOfDocs == AMOUNT_OF_DOCS_IN_POSTING_FILE) {

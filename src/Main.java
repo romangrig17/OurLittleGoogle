@@ -9,7 +9,8 @@ public class Main {
 
         Manager manager = new Manager();
         manager.setStemming(false);
-        manager.setPathForCorpus("C:\\Users\\user1\\Desktop\\masters\\השלמה\\information_retrieval\\corpus\\part_of_corpus");
+       // manager.setPathForCorpus("C:\\Users\\user1\\Desktop\\masters\\השלמה\\information_retrieval\\corpus\\part_of_corpus");
+        manager.setPathForCorpus("C:\\Users\\user1\\Desktop\\masters\\השלמה\\information_retrieval\\corpus\\corpus\\corpus");
         manager.setPathForPostingFile("C:\\Users\\user1\\Desktop\\masters\\השלמה\\information_retrieval\\corpus\\corpus_write");
         manager.run();
     }

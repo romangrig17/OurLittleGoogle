@@ -3,7 +3,6 @@ package Model;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.time.LocalTime;
 import java.util.regex.Pattern;
 
 import javafx.util.Pair;
@@ -25,6 +24,10 @@ enum types
 }
 
 public class Parser implements IParser{
+
+    StopWords stopWords;
+    boolean  stemming;
+    Stemmer stemmer;
 
 	//Percentage
 	Pattern patternPercent = Pattern.compile("[0-9]{1,}([\\.][0-9]{1,})?([ ]{1})?(percentage|percent|%)",Pattern.CASE_INSENSITIVE);//Number percent//Number percentage
@@ -54,8 +57,16 @@ public class Parser implements IParser{
 	Pattern patternPhoneNumber= Pattern.compile("([(])?[0-9]{3}(-| )[0-9]{3}(-| )?[0-9]{4}([)])?");
 
 
-	DecimalFormat decimalFormat = new DecimalFormat("###.###");
-
+	public Parser(String pathForCorpus, boolean _stemming) 
+	{
+		stopWords = new StopWords();
+		stopWords= stopWords.StopWords(pathForCorpus);
+		stemming=_stemming;
+		if(stemming)
+		{
+			stemmer = new Stemmer();
+		}
+	}
 	//This function parse the input doc_text.
 	//The output is a hashMap of all the parsed words:
 	//first string is the term,int is the count.
@@ -73,7 +84,7 @@ public class Parser implements IParser{
 		//sb1=parseKG(termsHash,sb1);
 		sb1=parseNumbers(termsHash,sb1);
 		parseEndWords(termsHash,sb1);
-		printHash(termsHash);
+		//printHash(termsHash);
 
 		return termsHash;
 	}
@@ -147,17 +158,57 @@ public class Parser implements IParser{
 	//no output, just updates the the hash with the matched names and entities
 	void parseEndWords(HashMap<String,Integer> terms_Hash, StringBuffer doc_Text)
 	{
-		String[] allWords = doc_Text.toString().trim().replaceAll("\\(|\\)|\\]|\\[|\\\\|\\/|,|:|\\$|\\.|\\+|\\*|-|'|'|_|`|!|@|#|%|\\^|\"|&|;|\\?", "").split(" ");
+		String[] allWords = doc_Text.toString().trim().replaceAll("\\(|\\)|\\]|\\[|\\\\|\\/|,|:|\\$|\\.|\\+|\\*|-|_|`|!|@|#|%|\\^|\"|&|;|\\?|'s", "").split(" ");
 		int allWordsLength = allWords.length;
-		for(int i = 0; i<allWordsLength; i++)
+		if(stemming)
 		{
-
-			if(allWords[i].matches("[A-z]{2,}"))
+			if(stopWords!=null)
 			{
-				addToHash(terms_Hash,allWords[i]);
+				for(int i = 0; i<allWordsLength; i++)
+				{
+					if(allWords[i].matches("[A-z]{2,}('([A-z]{1,}))?") && !stopWords.IsStopWord(allWords[i]))
+					{
+						addToHash(terms_Hash,stemmer.Stemming(allWords[i]));
+					}
+				}
+			}
+			else
+			{
+				for(int i = 0; i<allWordsLength; i++)
+				{
+					if(allWords[i].matches("[A-z]{2,}('([A-z]{1,}))?"))
+					{
+						addToHash(terms_Hash,stemmer.Stemming(allWords[i]));
+					}
+				}
 			}
 		}
-
+		else
+		{
+			if(stopWords!=null)
+			{
+				for(int i = 0; i<allWordsLength; i++)
+				{
+					if(allWords[i].matches("[A-z]{2,}('([A-z]{1,}))?") && !stopWords.IsStopWord(allWords[i]))
+					{
+						
+						addToHash(terms_Hash,allWords[i]);
+					}
+				}
+			}
+			else
+			{
+				for(int i = 0; i<allWordsLength; i++)
+				{
+					if(allWords[i].matches("[A-z]{2,}('([A-z]{1,}))?"))
+					{
+						addToHash(terms_Hash,allWords[i]);
+					}
+				}
+			}
+			
+		}
+		
 		doc_Text.setLength(0);
 	}
 
@@ -262,9 +313,29 @@ public class Parser implements IParser{
 				}
 
 			}
-			else //n fraction Thousand/n fraction Million/n fraction Billion/n fraction KG/n fraction kg/n fraction Kg/n fraction kilogram ??
+			else if(allWords.length == 3)//n fraction Thousand/n fraction Million/n fraction Billion/n fraction KG/n fraction kg/n fraction Kg/n fraction kilogram ??
 			{
-				System.out.println("match 3 ??: "+matcher.group());
+				
+				if(allWords[1].equalsIgnoreCase("thousand"))
+				{
+					//System.out.println("match Thousand: "+matcher.group());
+					addToHash(terms_Hash,allWords[0]+" "+allWords[1]+"K");
+				}
+				else if(allWords[1].equalsIgnoreCase("million"))
+				{
+					//System.out.println("match Million: "+matcher.group());
+					addToHash(terms_Hash,allWords[0]+" "+allWords[1]+"M");
+				}
+				else if (allWords[1].equalsIgnoreCase("billion"))
+				{
+					//System.out.println("match Billion: "+matcher.group());
+					addToHash(terms_Hash,allWords[0]+" "+allWords[1]+"B");
+				}
+				else if (allWords[1].equalsIgnoreCase("kilogram") | allWords[1].equalsIgnoreCase("kg"))//kg|kilogram
+				{
+					//System.out.println("match kg: "+matcher.group());
+					addToHash(terms_Hash,allWords[0]+" "+allWords[1]+"kg");				
+				}
 			}
 			matcher.appendReplacement(sb2, " ");
 		}

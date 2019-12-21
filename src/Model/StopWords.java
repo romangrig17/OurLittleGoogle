@@ -10,7 +10,7 @@ public class StopWords {
 
     private HashSet<String> allStopWords;
 
-    public StopWords(String path) {
+    public StopWords StopWords(String path) {
         String pathOfStopWords = "";
         File directory = new File(path);
         String[] files = directory.list();
@@ -31,7 +31,14 @@ public class StopWords {
             br.close();
         } catch (Exception e) {
             System.out.println("problem with the reading from the stopwords file!! in: " + file.getPath());
+            return null;
         }
+        return this;
+    }
+    
+    public boolean IsStopWord(String str)
+    {
+    	return allStopWords.contains(str.toLowerCase());
     }
 
     public HashMap<String, Integer> removeStopWords(HashMap<String, Integer> listOfTerms) {
