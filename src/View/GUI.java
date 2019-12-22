@@ -162,6 +162,7 @@ public class GUI {
                             f.delete();
                         }
                     }
+                    file.delete();
                     manager = null;
                 }
             }

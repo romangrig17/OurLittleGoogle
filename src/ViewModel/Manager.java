@@ -4,9 +4,11 @@ package ViewModel;
 import Model.*;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class Manager {
 
@@ -38,7 +40,6 @@ public class Manager {
         docsInfo = new StringBuilder();
         fileReader = new ReadFile(pathForCorpus);
         allFiles = fileReader.getAllFiles();
-        //this.pathForPostingFile = pathForPostingFile;
         if (stemming) {
             this.pathForPostingFile = pathForPostingFile + "\\With Stemming";
             new File(pathForPostingFile).mkdirs();
@@ -49,7 +50,7 @@ public class Manager {
             file.mkdir();
             writePostingFile = new WritePostingFile(pathForPostingFile);
         }
-        parser = new Parser(pathForCorpus,stemming);
+        parser = new Parser(pathForCorpus, stemming);
         // create a pool of threads, 5 max jobs will execute in parallel
         ExecutorService threadPool = Executors.newFixedThreadPool(5);
         //run on all files
@@ -59,27 +60,15 @@ public class Manager {
             for (String docID : allTextsFromTheFile.keySet()) {
                 //parsing each doc
                 HashMap<String, Integer> listOfTerms = parser.parseDoc(allTextsFromTheFile.get(docID).toString(), docID);
-                //remove the stop words from the list of terms which we got from parser
-                //listOfTerms = stopWords.removeStopWords(listOfTerms);
-                //do a stemming for each term in the doc except numbers
-               // HashMap<String, Integer> listOfTermsAfterStemming = null;
-                /*if (stemming) {
-                    Stemmer steaming = new Stemmer();
-                    listOfTermsAfterStemming = steaming.Stemmer(listOfTerms);
-                    listOfTerms = null;
-                }
-                //manager send list of terms after/before stemming to indexer
-                if (listOfTermsAfterStemming == null) {
-                    //getInfoOnDoc(listOfTerms, docID);
-                    indexer.getPostingFileFromListOfTerms(listOfTerms, docID);
-                } else {*/
-                    //getInfoOnDoc(listOfTermsAfterStemming, docID);
-                    indexer.getPostingFileFromListOfTerms(listOfTerms, docID);
-           
+
+                //building temp posting file on ram
+                indexer.getPostingFileFromListOfTerms(listOfTerms, docID);
+
                 //make a batch of document in posting file, each batch written to disk
+                getInfoOnDoc(listOfTerms,docID);
                 counterOfDocs++;
                 if (counterOfDocs == AMOUNT_OF_DOCS_IN_POSTING_FILE) {
-                    indexer.setDictionary(updateDictionary(indexer.getDictionary()));
+                    indexer.setDictionary((indexer.getDictionary()));
                     counterOfDocs = 0;
                     writePostingFile.putPostingFile(indexer.getPostingFile());
                     threadPool.execute(writePostingFile);
@@ -97,6 +86,10 @@ public class Manager {
         while (!threadPool.isTerminated()) {
         }
 
+        //update the dictionary for lower and upper letters in terms
+        System.out.println("Before Update");
+        indexer.setDictionary(updateDictionary(indexer.getDictionary()));
+        System.out.println("After Update");
         //writing all the entity we got in corpus and check if the appear more then one time
         writePostingFile.writeTheEntity(indexer.getDictionary());
         //writing the dictionary to disk
@@ -107,11 +100,27 @@ public class Manager {
         sortByTerms();
 
         System.out.println("The amount of unique terms: " + indexer.getDictionary().size());
-
+        writeInfoOnDoc();
         //calculate the time for program
         long elapsedTime = System.currentTimeMillis() - start;
         double elapsedTimeD = (double) elapsedTime;
         System.out.println("The time of program: " + (elapsedTimeD / 60000) + " Min");
+
+        /*
+        final Map<String, Integer> sortedByCount = sortByValue(getHelpDic());
+        int i=0;
+        for (String term: sortedByCount.keySet())
+        {
+            i++;
+            if(i>10)
+            {
+                break;
+            }
+            else {
+                System.out.println(term + " : " + indexer.getDictionary().get(term).split(",")[0]);
+            }
+        }
+        */
     }
 
     //<editor-fold des="Help Function For GUI>
@@ -121,13 +130,30 @@ public class Manager {
             for (Integer amount : listOfTerms.values()) {
                 counterAmount = counterAmount + amount;
             }
-            docsInfo.append("In Doc: ").append(docName).append(" was: ").append(listOfTerms.size()).append(" Terms");
-            docsInfo.append(" ,And the length of document is:").append(counterAmount);
+            docsInfo.append(docName).append(":Unique").append(listOfTerms.size()).append("Words:").append(counterAmount).append(";");
             String popularTerm = Collections.max(listOfTerms.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
-            docsInfo.append(" And the most popular term is: ").append(popularTerm).append(" And he appeared: ").append(listOfTerms.get(popularTerm)).append(" times. \n");
+            docsInfo.append(popularTerm).append("#").append(listOfTerms.get(popularTerm)).append("\n");
+            //docsInfo.append("In Doc: ").append(docName).append(" was: ").append(listOfTerms.size()).append(" Terms");
+            //docsInfo.append(" ,And the length of document is:").append(counterAmount);
+            //String popularTerm = Collections.max(listOfTerms.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
+            //docsInfo.append(" And the most popular term is: ").append(popularTerm).append(" And he appeared: ").append(listOfTerms.get(popularTerm)).append(" times. \n");
         }
     }
 
+
+    private void writeInfoOnDoc()
+    {
+        try{
+            File file = new File(pathForPostingFile + "\\Info On Docs.txt");
+            FileWriter writer = new FileWriter(file);
+            writer.write(docsInfo.toString());
+            writer.close();
+        }catch (Exception e)
+        {
+            e.toString();
+        }
+
+    }
 
     /**
      * return sorted dictionary: [0] - the term, [1] - the info on term
@@ -169,27 +195,30 @@ public class Manager {
         indexer.setDictionary(writeDictionary.loadDictionary());
     }
 
-    public HashMap<String,String> updateDictionary(HashMap<String,String> dictionary)
-    {
-        HashMap<String,String> updatedDictionary = new HashMap<>();
-        Set<String> allterms = dictionary.keySet();
-        for (String term : allterms)
-        {
-            if(term.charAt(0)>= 'A' && term.charAt(0) <= 'Z' && dictionary.containsKey(term.toLowerCase()))
-            {
+    private HashMap<String, String> updateDictionary(HashMap<String, String> dictionary) {
+        HashMap<String, String> updatedDictionary = new HashMap<>();
+        Set<String> allTerms = dictionary.keySet();
+        for (String term : allTerms) {
+            if (term.charAt(0) >= 'A' && term.charAt(0) <= 'Z' && dictionary.containsKey(term.toLowerCase())) {
                 String[] splitLineOfUpper = dictionary.get(term).split(",");
                 String[] splitLineOfLowwer = dictionary.get(term).split(",");
                 int amountOfAppearance = Integer.parseInt(splitLineOfUpper[0]) + Integer.parseInt(splitLineOfLowwer[0]);
                 int numberOfDocs = Integer.parseInt(splitLineOfUpper[1]) + Integer.parseInt(splitLineOfLowwer[1]);
-                updatedDictionary.put(term.toLowerCase(),amountOfAppearance + "," + numberOfDocs + "," + splitLineOfLowwer[2]);
+                updatedDictionary.put(term.toLowerCase(), amountOfAppearance + "," + numberOfDocs + "," + splitLineOfLowwer[2]);
+            } else if(term.charAt(0) == '!'){
+                if(Integer.parseInt(dictionary.get(term).split(",")[0]) > 1)
+                {
+                    updatedDictionary.put(term.substring(1),dictionary.get(term));
+                }
             }
             else
             {
-                updatedDictionary.put(term,dictionary.get(term));
+                updatedDictionary.put(term, dictionary.get(term));
             }
         }
         return updatedDictionary;
     }
+
     //</editor-fold>
 
     //<editor-fold des="Setters">
@@ -216,4 +245,27 @@ public class Manager {
     }
     //</editor-fold>
 
+    //<editor-fold des = "sort dictionary by value">
+/*
+    public HashMap<String , Integer> getHelpDic()
+    {
+        HashMap<String , Integer> helpDic = new HashMap<>();
+        HashMap<String,String> dicHashMap = indexer.getDictionary();
+
+        for(String term : dicHashMap.keySet())
+        {
+            helpDic.put(term,Integer.parseInt(dicHashMap.get(term).split(",")[0]));
+        }
+
+        return helpDic;
+    }
+
+    public static Map<String, Integer> sortByValue(final Map<String, Integer> wordCounts) {
+        return wordCounts.entrySet()
+                .stream()
+                .sorted((Map.Entry.<String, Integer>comparingByValue().reversed()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+    }
+ */
+    //</editor-fold>
 }

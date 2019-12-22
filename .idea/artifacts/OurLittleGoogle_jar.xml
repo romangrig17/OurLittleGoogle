@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="OurLittleGoogle:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/OurLittleGoogle_jar</output-path>
+    <root id="archive" name="OurLittleGoogle.jar">
+      <element id="module-output" name="OurLittleGoogle" />
+    </root>
+  </artifact>
+</component>
