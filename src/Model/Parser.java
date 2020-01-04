@@ -191,6 +191,8 @@ public class Parser implements IParser{
 				{
 					if(allWords[i].matches("[A-z]{2,}('([A-z]{1,}))?") && !stopWords.IsStopWord(allWords[i]))
 					{
+						if (allWords[i].toLowerCase().compareTo("drinkingcoffee")==0 )
+							System.out.println("adding : "+allWords[i] );
 						
 						addToHash(terms_Hash,allWords[i]);
 					}

@@ -75,6 +75,7 @@ public class ReadFile implements IReadFile {
 
                     while (!((st = br.readLine()).contains("</TEXT>"))) {
                         onlyText.append(st);
+                        onlyText.append(" ");
                     }
                     allDocsInTheFile.put(docName, onlyText);
                 }
