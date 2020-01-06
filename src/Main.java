@@ -14,7 +14,7 @@ public class Main {
         manager.setPathForPostingFile("C:\\PostingFile");
         manager.run();
         //manager.loadDictionary(false);
-        //manager.searchQuery("coffee");
+        //manager.searchQuery("coffee break");
         
     }
 
