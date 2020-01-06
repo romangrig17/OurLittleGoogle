@@ -13,6 +13,9 @@ public class Main {
         //manager.setPathForCorpus("D:\\corpus2");
         manager.setPathForPostingFile("C:\\PostingFile");
         manager.run();
+        //manager.loadDictionary(false);
+        //manager.searchQuery("coffee");
+        
     }
 
 

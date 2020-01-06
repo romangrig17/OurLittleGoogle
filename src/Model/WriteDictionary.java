@@ -14,7 +14,10 @@ public class WriteDictionary {
     public WriteDictionary() {
     }
 
-
+    public String pathToWrite()
+    {
+    	return pathToWrite;
+    }
     /**
      * this function write the dictionary to disk
      *

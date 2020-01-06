@@ -26,7 +26,7 @@ public class WritePostingFile extends Thread {
 
 
     //amount of the posting files we write
-    private static final int AMOUNT_OF_POSTING_FILES = 2500;
+    public static final int AMOUNT_OF_POSTING_FILES = 2500;
 
     //initialization semaphores for each posting file
     private static HashMap<String, Semaphore> semaphoreHashMap;

@@ -19,6 +19,8 @@ public class Manager {
     WritePostingFile writePostingFile;
     WriteDictionary writeDictionary;
     Parser parser;
+    
+    Searcher searcher;
 
     //variables
     String pathForPostingFile;
@@ -192,7 +194,19 @@ public class Manager {
      */
     public void loadDictionary(boolean stemming) {
         writeDictionary.setPathToWrite(pathForPostingFile, stemming, true);
-        indexer.setDictionary(writeDictionary.loadDictionary());
+        //indexer.setDictionary(writeDictionary.loadDictionary());
+        if(parser==null)
+        {
+        	System.out.println("pathForCorpus is: "+pathForCorpus);
+        	parser= new Parser(pathForCorpus, stemming);
+        }
+       
+        searcher=new Searcher(parser,writeDictionary.loadDictionary(),WritePostingFile.AMOUNT_OF_POSTING_FILES,writeDictionary.pathToWrite());
+    }
+    
+    public void searchQuery(String query)
+    {
+    	this.searcher.query(query);
     }
 
     private HashMap<String, String> updateDictionary(HashMap<String, String> dictionary) {

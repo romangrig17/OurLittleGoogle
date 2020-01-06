@@ -65,10 +65,14 @@ public class ReadFile implements IReadFile {
 
                 if (st.contains("<DOCNO>")) {
                     String[] line = st.split(" ");
-                    if (line.length == 1) {
-                        docName = line[0];
-                    } else {
+                    if (line.length == 3) 
+                    {
                         docName = line[1];
+                    } else 
+                    {
+                    	line = st.split(">");
+                    	line = line[1].split("<");
+                        docName = line[0];
                     }
                 } else if (st.contains("<TEXT>")) {
                     StringBuilder onlyText = new StringBuilder();
