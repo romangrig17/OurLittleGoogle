@@ -2,6 +2,7 @@ package ViewModel;
 
 
 import Model.*;
+import javafx.beans.binding.StringBinding;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -31,7 +32,10 @@ public class Manager {
     int counterOfDocs = 0;
     boolean stemming;
 
-    private static final int AMOUNT_OF_DOCS_IN_POSTING_FILE = 17000;
+    HashMap<String,Integer> infoDocTest = new HashMap<>();
+    int line = 1;
+
+    private static final int AMOUNT_OF_DOCS_IN_POSTING_FILE = 25000;
 
     public Manager() {
         indexer = new Indexer();
@@ -126,15 +130,19 @@ public class Manager {
     }
 
     //<editor-fold des="Help Function For GUI>
+
+    //key = doc ID , lower and upper words ,  remove ! from entity
     private void getInfoOnDoc(HashMap<String, Integer> listOfTerms, String docName) {
         if (listOfTerms != null && listOfTerms.size() > 2) {
             int counterAmount = 0;
             for (Integer amount : listOfTerms.values()) {
                 counterAmount = counterAmount + amount;
             }
-            docsInfo.append(docName).append(":Unique").append(listOfTerms.size()).append("Words:").append(counterAmount).append(";");
+            infoDocTest.put(docName,line);
+            docsInfo.append(docName).append(":Unique Terms: ").append(listOfTerms.size()).append(" ,Words: ").append(counterAmount).append(";");
             String popularTerm = Collections.max(listOfTerms.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
             docsInfo.append(popularTerm).append("#").append(listOfTerms.get(popularTerm)).append("\n");
+            line++;
             //docsInfo.append("In Doc: ").append(docName).append(" was: ").append(listOfTerms.size()).append(" Terms");
             //docsInfo.append(" ,And the length of document is:").append(counterAmount);
             //String popularTerm = Collections.max(listOfTerms.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
@@ -142,6 +150,19 @@ public class Manager {
         }
     }
 
+//    private void writeInfoOnDocHash()
+//    {
+//        try{
+//            File file = new File(pathForPostingFile + "\\Info On Docs.txt");
+//            FileWriter writer = new FileWriter(file);
+//            writer.write(infoDocTest);
+//            writer.close();
+//        }catch (Exception e)
+//        {
+//            e.toString();
+//        }
+//
+//    }
 
     private void writeInfoOnDoc()
     {
