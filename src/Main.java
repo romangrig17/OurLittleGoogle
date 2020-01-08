@@ -9,12 +9,11 @@ public class Main {
 
         Manager manager = new Manager();
         manager.setStemming(false);
-        manager.setPathForCorpus("D:\\corpus\\corpus2");
+        manager.setPathForCorpus("C:\\corpus");
         //manager.setPathForCorpus("D:\\corpus2");
-        manager.setPathForPostingFile("D:\\corpus\\Posting");
-        manager.run();
-        //manager.loadDictionary(false);
-        //manager.searchQuery("coffee break");
-        
+        manager.setPathForPostingFile("C:\\PostingFile");
+       // manager.run();
+        manager.loadDictionary(false);
+        manager.searchQuery("coffee break BAPELA bapela");
     }
 }

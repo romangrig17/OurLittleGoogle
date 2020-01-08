@@ -36,25 +36,54 @@ public class Searcher {
 		for (Map.Entry word: words.entrySet())
 		{
 			System.out.println("searching for:" + word.getKey().toString());
-			Integer termHashCode = (Math.abs((word.getKey().toString().toLowerCase()).hashCode() % this.amountOfPostingFiles));
-			File tempFile = new File(pathPostingFiles+"\\"+termHashCode.toString()+".txt");
-			if (tempFile.exists()) 
-            {
-            	HashSet<String> infoPostingFile = getTermFromPostingFile(word.getKey().toString(), tempFile);//, termsByHashCode.get(termHashCode));
-                if (infoPostingFile == null)
-                {
-                    System.out.println("term in dict but not in files: " + word.getKey().toString());
-                }
-                else
-                {
-                	for (String filepost: infoPostingFile)
-                	{
-                		String[] lineSplit = filepost.split("#");
-                		//System.out.println("found in :" + lineSplit[0] + " times: "+lineSplit[1]);
-                	}
-                	allInfoPostingFile.addAll(infoPostingFile);	
-                }
-            } 
+			if(this.dictionary.containsKey(word.getKey().toString().toLowerCase()))
+			{
+				Integer termHashCode = (Math.abs((word.getKey().toString().toLowerCase()).hashCode() % this.amountOfPostingFiles));
+				File tempFile = new File(pathPostingFiles+"\\"+termHashCode.toString()+".txt");
+				if (tempFile.exists()) 
+	            {
+	            	HashSet<String> infoPostingFile = getTermFromPostingFile(word.getKey().toString().toLowerCase(), tempFile);//, termsByHashCode.get(termHashCode));
+	            	System.out.println("found in lower");
+	            	if (infoPostingFile == null)
+	                {
+	                    System.out.println("term in dict but not in files: " + word.getKey().toString());
+	                }
+	                else
+	                {
+	                	/*for (String filepost: infoPostingFile)
+	                	{
+	                		String[] lineSplit = filepost.split("#");
+	                		System.out.println("found in :" + lineSplit[0] + " times: "+lineSplit[1]);
+	                	}*/
+	                	allInfoPostingFile.addAll(infoPostingFile);	
+	                }
+	            }
+			}
+			
+			if(this.dictionary.containsKey(word.getKey().toString().toUpperCase()))
+			{
+				Integer termHashCode = (Math.abs((word.getKey().toString().toLowerCase()).hashCode() % this.amountOfPostingFiles));
+				File tempFile = new File(pathPostingFiles+"\\"+termHashCode.toString()+".txt");
+				if (tempFile.exists()) 
+	            {
+	            	HashSet<String> infoPostingFile = getTermFromPostingFile(word.getKey().toString().toUpperCase(), tempFile);//, termsByHashCode.get(termHashCode));
+	            	System.out.println("found in upper");
+	            	if (infoPostingFile == null)
+	                {
+	                    System.out.println("term in dict but not in files: " + word.getKey().toString());
+	                }
+	                else
+	                {
+	                	/*for (String filepost: infoPostingFile)
+	                	{
+	                		String[] lineSplit = filepost.split("#");
+	                		//System.out.println("found in :" + lineSplit[0] + " times: "+lineSplit[1]);
+	                	}*/
+	                	allInfoPostingFile.addAll(infoPostingFile);	
+	                }
+	            }
+				
+			}
 		}
 	}
 	
@@ -62,33 +91,31 @@ public class Searcher {
 	{
 		try 
 		{
-			HashSet<String> files;
+			HashSet<String> files=new HashSet<String>();;
 	        BufferedReader br = new BufferedReader(new FileReader(file));
 	        String line;
-	        StringBuilder text = new StringBuilder();
-	        term= term.toLowerCase();
 	        while ((line = br.readLine()) != null) {
-	            //if the term is already in the posting file - we will update the line and put the new to
-	            String[] lineSplit = line.split(":");
-	            if (term.compareTo(lineSplit[0].toLowerCase()) == 0) //TODO: in upper?
-	            {
-	            	files=new HashSet<String>();
-	            	String[] docs = lineSplit[1].split(",");
-	            	for (String doc :docs)
-	            			files.add(doc);
-	            	return files;
-	            	 
-	            }
+	        	if(!line.isEmpty() && term.charAt(0) ==  line.charAt(0))
+	        	{
+		            String[] lineSplit = line.split(":");
+		            if (term.compareTo(lineSplit[0]) == 0)
+		            {
+		            	String[] docs = lineSplit[1].split(",");
+		            	for (String doc :docs)
+		            			files.add(doc);
+		            	 br.close();
+		            	return files;
+		            }
+	        	}
 	        }
-	        br.close();
-	        return null;
+	       
 	    } 
 		catch (Exception e) 
 		{
 	        e.toString();
 	        return null;
 	    }
-
+		return null;
 	}
 	
 	
