@@ -2,11 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7f03da72-b497-4857-8dcb-4423fbc4d90d" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/View/GUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/View/GUI.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ViewModel/Manager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ViewModel/Manager.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,8 +69,16 @@
       <option name="presentableId" value="Default" />
       <updated>1576580034514</updated>
       <workItem from="1576580045291" duration="631000" />
-      <workItem from="1578492883566" duration="3958000" />
+      <workItem from="1578492883566" duration="4200000" />
     </task>
+    <task id="LOCAL-00001" summary="8.1">
+      <created>1578498531312</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1578498531312</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -92,27 +97,35 @@
       </map>
     </option>
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="8.1" />
+    <option name="LAST_COMMIT_MESSAGE" value="8.1" />
+  </component>
   <component name="WindowStateProjectService">
     <state x="-1112" y="408" key="#com.intellij.ide.util.projectWizard.JdkChooserPanel.MyDialog" timestamp="1578492891631">
       <screen x="-1920" y="0" width="1920" height="1040" />
     </state>
     <state x="-1112" y="408" key="#com.intellij.ide.util.projectWizard.JdkChooserPanel.MyDialog/0.0.1536.824/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1578492891631" />
-    <state width="1877" height="282" key="GridCell.Tab.0.bottom" timestamp="1578498508998">
+    <state x="-1335" y="114" key="CommitChangelistDialog2" timestamp="1578498530802">
       <screen x="-1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="282" key="GridCell.Tab.0.bottom/0.0.1536.824/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1578498508998" />
-    <state width="1877" height="282" key="GridCell.Tab.0.center" timestamp="1578498508998">
+    <state x="-1335" y="114" key="CommitChangelistDialog2/0.0.1536.824/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1578498530802" />
+    <state width="1877" height="282" key="GridCell.Tab.0.bottom" timestamp="1578498662095">
       <screen x="-1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="282" key="GridCell.Tab.0.center/0.0.1536.824/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1578498508998" />
-    <state width="1877" height="282" key="GridCell.Tab.0.left" timestamp="1578498508998">
+    <state width="1877" height="282" key="GridCell.Tab.0.bottom/0.0.1536.824/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1578498662095" />
+    <state width="1877" height="282" key="GridCell.Tab.0.center" timestamp="1578498662094">
       <screen x="-1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="282" key="GridCell.Tab.0.left/0.0.1536.824/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1578498508998" />
-    <state width="1877" height="282" key="GridCell.Tab.0.right" timestamp="1578498508998">
+    <state width="1877" height="282" key="GridCell.Tab.0.center/0.0.1536.824/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1578498662094" />
+    <state width="1877" height="282" key="GridCell.Tab.0.left" timestamp="1578498662094">
       <screen x="-1920" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="282" key="GridCell.Tab.0.right/0.0.1536.824/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1578498508998" />
+    <state width="1877" height="282" key="GridCell.Tab.0.left/0.0.1536.824/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1578498662094" />
+    <state width="1877" height="282" key="GridCell.Tab.0.right" timestamp="1578498662094">
+      <screen x="-1920" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="282" key="GridCell.Tab.0.right/0.0.1536.824/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1578498662094" />
     <state x="-1582" y="172" key="MergeDialog" timestamp="1578498376439">
       <screen x="-1920" y="0" width="1920" height="1040" />
     </state>
@@ -121,9 +134,13 @@
       <screen x="-1920" y="0" width="1920" height="1040" />
     </state>
     <state x="-1248" y="235" key="MultipleFileMergeDialog/0.0.1536.824/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1578498376443" />
-    <state x="-1151" y="436" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1578498341502">
+    <state x="-1368" y="252" key="Vcs.Push.Dialog.v2" timestamp="1578498541053">
       <screen x="-1920" y="0" width="1920" height="1040" />
     </state>
-    <state x="-1151" y="436" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1536.824/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1578498341502" />
+    <state x="-1368" y="252" key="Vcs.Push.Dialog.v2/0.0.1536.824/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1578498541053" />
+    <state x="-1151" y="436" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1578498534218">
+      <screen x="-1920" y="0" width="1920" height="1040" />
+    </state>
+    <state x="-1151" y="436" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1536.824/-1920.0.1920.1040@-1920.0.1920.1040" timestamp="1578498534218" />
   </component>
 </project>

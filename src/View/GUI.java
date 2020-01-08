@@ -137,9 +137,13 @@ public class GUI {
 
 
 
-        JCheckBox semanticCheckBox = new JCheckBox("Allow semantic");
+        JCheckBox semanticCheckBox = new JCheckBox("Allow Semantic");
         semanticCheckBox.setBounds(150, 250, 120, 25);
         panel.add(semanticCheckBox);
+
+        JButton resultsButton = new JButton("Show Results");
+        resultsButton.setBounds(280, 250, 120, 25);
+        panel.add(resultsButton);
         //</editor-fold>
 
         // Creating input browse button
