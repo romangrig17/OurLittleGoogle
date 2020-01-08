@@ -23,7 +23,7 @@ public class GUI {
         // Creating instance of JFrame
         JFrame frame = new JFrame("Our Little Google");
         // Setting the width and height of frame
-        frame.setSize(430, 230);
+        frame.setSize(430, 350);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         /* Creating panel. This is same as a div tag in HTML
@@ -79,6 +79,68 @@ public class GUI {
         inputBrowseButton.setBounds(280, 20, 80, 25);
         panel.add(inputBrowseButton);
 
+        //<editor-fold> des="query's">
+        JButton freeQueryButton = new JButton("Click on me to enter a query");
+        freeQueryButton.setBounds(100, 170, 200, 25);
+        panel.add(freeQueryButton);
+        freeQueryButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JTextField freeQuery = new JTextField();
+                final JComponent[] inputs = new JComponent[] {
+                        new JLabel("Enter Your Query"),
+                        freeQuery,
+                };
+                int result = JOptionPane.showConfirmDialog(null, inputs, "Free Query", JOptionPane.PLAIN_MESSAGE);
+                if (result == JOptionPane.OK_OPTION) {
+                    System.out.println("You entered " + freeQuery.getText() );
+                } else {
+                    System.out.println("User canceled / closed the dialog, result = " + result);
+                }
+            }
+        });
+
+
+        JLabel queryLabel = new JLabel("Query path:");
+        queryLabel.setBounds(10, 210, 80, 25);
+        panel.add(queryLabel);
+
+
+        JTextField queryText = new JTextField(20);
+        queryText.setBounds(100, 210, 165, 25);
+        panel.add(queryText);
+
+
+        JButton queryBrowseButton = new JButton("Browse");
+        queryBrowseButton.setBounds(280, 210, 80, 25);
+        panel.add(queryBrowseButton);
+
+        queryBrowseButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String inputQuery = new String();
+                JFileChooser fileChooser = new JFileChooser();
+
+                // For Directory
+                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                fileChooser.setAcceptAllFileFilterUsed(false);
+
+                int rVal = fileChooser.showOpenDialog(null);
+                if (rVal == JFileChooser.APPROVE_OPTION) {
+                    queryText.setText(fileChooser.getSelectedFile().toString());
+                    inputQuery = fileChooser.getSelectedFile().toString();
+                    setInputPath(inputQuery);
+                    //manager.setPathForCorpus(inputPath);
+                    System.out.println("The Input Is: " + inputQuery);
+                }
+            }
+        });
+
+
+
+        JCheckBox semanticCheckBox = new JCheckBox("Allow semantic");
+        semanticCheckBox.setBounds(150, 250, 120, 25);
+        panel.add(semanticCheckBox);
+        //</editor-fold>
 
         // Creating input browse button
 
@@ -88,9 +150,6 @@ public class GUI {
 
                 // For Directory
                 fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-                // For File
-                //fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
                 fileChooser.setAcceptAllFileFilterUsed(false);
 
@@ -117,10 +176,6 @@ public class GUI {
 
                 // For Directory
                 fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-                // For File
-                //fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-
                 fileChooser.setAcceptAllFileFilterUsed(false);
 
                 int rVal = fileChooser.showOpenDialog(null);
@@ -139,6 +194,11 @@ public class GUI {
         stemmingCheckBox.setBounds(10, 80, 120, 25);
         panel.add(stemmingCheckBox);
 
+        // Show Entity
+        JButton entityLabel = new JButton("Show entities");
+        entityLabel.setBounds(10, 250, 120, 25);
+        panel.add(entityLabel);
+
 
         // Creating zero button
         JButton zeroButton = new JButton("Zero");
@@ -154,6 +214,10 @@ public class GUI {
                         file = new File(getOutputPath() + "\\With Stemming");
                     } else {
                         file = new File(getOutputPath() + "\\Without Stemming");
+                    }
+                    if (file.list().length == 0)
+                    {
+                        showMessageDialog(null, "The output path is empty!");
                     }
 
                     File[] files = file.listFiles();

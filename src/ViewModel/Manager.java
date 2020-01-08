@@ -4,11 +4,8 @@ package ViewModel;
 import Model.*;
 import javafx.beans.binding.StringBinding;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.ObjectOutputStream;
 import java.util.*;
@@ -33,10 +30,11 @@ public class Manager {
     String pathForCorpus;
     ArrayList<String> allFiles;
     String[][] sortedDictionary;
-    HashMap<String,Document> docsInfo;
+    StringBuilder docsInfo;
     int counterOfDocs = 0;
     boolean stemming;
 
+    HashMap<String,Integer> infoDocHsh = new HashMap<>();
     int line = 1;
 
     private static final int AMOUNT_OF_DOCS_IN_POSTING_FILE = 25000;
@@ -47,7 +45,7 @@ public class Manager {
     }
 
     public void run() {
-        docsInfo = new HashMap<String,Document>();
+        docsInfo = new StringBuilder();
         fileReader = new ReadFile(pathForCorpus);
         allFiles = fileReader.getAllFiles();
         if (stemming) {
@@ -110,7 +108,8 @@ public class Manager {
         sortByTerms();
 
         System.out.println("The amount of unique terms: " + indexer.getDictionary().size());
-        writeInfoOnDocs();
+        writeInfoOnDoc();
+        writeInfoOnDocHash();
         //calculate the time for program
         long elapsedTime = System.currentTimeMillis() - start;
         double elapsedTimeD = (double) elapsedTime;
@@ -142,53 +141,33 @@ public class Manager {
             for (Integer amount : listOfTerms.values()) {
                 counterAmount = counterAmount + amount;
             }
+            infoDocHsh.put(docName,line);
+            docsInfo.append(docName).append(":Unique Terms: ").append(listOfTerms.size()).append(" ,Words: ").append(counterAmount).append(";");
             String popularTerm = Collections.max(listOfTerms.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
-            Document doc=new Document(listOfTerms.size(),counterAmount,popularTerm,listOfTerms.get(popularTerm));
-            docsInfo.put(docName,doc);
+            docsInfo.append(popularTerm).append("#").append(listOfTerms.get(popularTerm)).append("\n");
+            line++;
+            //docsInfo.append("In Doc: ").append(docName).append(" was: ").append(listOfTerms.size()).append(" Terms");
+            //docsInfo.append(" ,And the length of document is:").append(counterAmount);
+            //String popularTerm = Collections.max(listOfTerms.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
+            //docsInfo.append(" And the most popular term is: ").append(popularTerm).append(" And he appeared: ").append(listOfTerms.get(popularTerm)).append(" times. \n");
         }
     }
 
-    private HashMap<String,Document> readInfoOnDocs()
-    {
-    	HashMap<String,Document> hashDoc=new HashMap<String,Document>();
-    	Document doc;
-    	
-        try{
-        	BufferedReader reader = new BufferedReader(new FileReader(pathForPostingFile + "\\InfoOnDocs.txt"));
-    	 	String line;
-    	 	while((line = reader.readLine()) != null) {
-    	 		 String[] splitLine = line.split("#");
-    	 		doc=new Document(Integer.parseInt(splitLine[1]),Integer.parseInt(splitLine[2]),splitLine[3],Integer.parseInt(splitLine[4]));
-    	 		hashDoc.put(splitLine[0], doc);
-             }
-        	
-    	 	reader.close();
-    	 	
-        }catch (Exception e)
-        {
-            e.toString();
-        }
-        return hashDoc;
 
-    }
-    
-
-    private void writeInfoOnDocs()
+    private void writeInfoOnDocHash()
      {
          try{
+         	
+         	FileOutputStream file = new FileOutputStream(pathForPostingFile + "\\Info On Docs Hash.txt");
+         	ObjectOutputStream oos = new ObjectOutputStream(file);
 
-        	 	BufferedWriter writer = new BufferedWriter(new FileWriter(pathForPostingFile + "\\InfoOnDocs.txt"));
-	         	Set set = docsInfo.entrySet();
-	            Iterator iterator = set.iterator();
-	            while(iterator.hasNext()) {
-	                Map.Entry entry = (Map.Entry)iterator.next();
-	                writer.write(entry.getKey()+"#");
-	                //System.out.println(entry.getKey());
-	                writer.write(docsInfo.get(entry.getKey()).toString());
-	               // System.out.println(docsInfo.get(entry.getKey()));
-	            }
-	            writer.close();
-             	
+         	oos.writeObject(infoDocHsh);
+         	oos.close();
+         	
+             /*File file = new File(pathForPostingFile + "\\Info On Docs Hash.txt");
+             FileWriter writer = new FileWriter(file);
+             writer.write(infoDocHsh.toString());
+             writer.close();*/
          }catch (Exception e)
          {
              e.toString();
@@ -196,6 +175,21 @@ public class Manager {
 
      }
 
+
+
+    private void writeInfoOnDoc()
+    {
+        try{
+            File file = new File(pathForPostingFile + "\\Info On Docs.txt");
+            FileWriter writer = new FileWriter(file);
+            writer.write(docsInfo.toString());
+            writer.close();
+        }catch (Exception e)
+        {
+            e.toString();
+        }
+
+    }
 
     /**
      * return sorted dictionary: [0] - the term, [1] - the info on term
@@ -233,10 +227,7 @@ public class Manager {
      * This function is loading the dictionary to memory
      */
     public void loadDictionary(boolean stemming) {
-    	if(writeDictionary.pathToWrite() == null)
-    	{
-    		writeDictionary.setPathToWrite(pathForPostingFile, stemming, true);
-    	}
+        writeDictionary.setPathToWrite(pathForPostingFile, stemming, true);
         //indexer.setDictionary(writeDictionary.loadDictionary());
         if(parser==null)
         {
@@ -244,10 +235,8 @@ public class Manager {
         	parser= new Parser(pathForCorpus, stemming);
         }
        
-        this.pathForPostingFile=writeDictionary.pathToWrite();
-        searcher=new Searcher(parser,writeDictionary.loadDictionary(),readInfoOnDocs(),WritePostingFile.AMOUNT_OF_POSTING_FILES,writeDictionary.pathToWrite());
+        //searcher=new Searcher(parser,writeDictionary.loadDictionary(),writeDictionary.loadDictionaryInfo(),WritePostingFile.AMOUNT_OF_POSTING_FILES,writeDictionary.pathToWrite());
     }
-    
     
     public void searchQuery(String query)
     {
