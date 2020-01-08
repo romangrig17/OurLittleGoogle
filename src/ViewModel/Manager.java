@@ -5,7 +5,9 @@ import Model.*;
 import javafx.beans.binding.StringBinding;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.ObjectOutputStream;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,7 +34,7 @@ public class Manager {
     int counterOfDocs = 0;
     boolean stemming;
 
-    HashMap<String,Integer> infoDocTest = new HashMap<>();
+    HashMap<String,Integer> infoDocHsh = new HashMap<>();
     int line = 1;
 
     private static final int AMOUNT_OF_DOCS_IN_POSTING_FILE = 25000;
@@ -107,6 +109,7 @@ public class Manager {
 
         System.out.println("The amount of unique terms: " + indexer.getDictionary().size());
         writeInfoOnDoc();
+        writeInfoOnDocHash();
         //calculate the time for program
         long elapsedTime = System.currentTimeMillis() - start;
         double elapsedTimeD = (double) elapsedTime;
@@ -138,7 +141,7 @@ public class Manager {
             for (Integer amount : listOfTerms.values()) {
                 counterAmount = counterAmount + amount;
             }
-            infoDocTest.put(docName,line);
+            infoDocHsh.put(docName,line);
             docsInfo.append(docName).append(":Unique Terms: ").append(listOfTerms.size()).append(" ,Words: ").append(counterAmount).append(";");
             String popularTerm = Collections.max(listOfTerms.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
             docsInfo.append(popularTerm).append("#").append(listOfTerms.get(popularTerm)).append("\n");
@@ -150,19 +153,29 @@ public class Manager {
         }
     }
 
-//    private void writeInfoOnDocHash()
-//    {
-//        try{
-//            File file = new File(pathForPostingFile + "\\Info On Docs.txt");
-//            FileWriter writer = new FileWriter(file);
-//            writer.write(infoDocTest);
-//            writer.close();
-//        }catch (Exception e)
-//        {
-//            e.toString();
-//        }
-//
-//    }
+
+    private void writeInfoOnDocHash()
+     {
+         try{
+         	
+         	FileOutputStream file = new FileOutputStream(pathForPostingFile + "\\Info On Docs Hash.txt");
+         	ObjectOutputStream oos = new ObjectOutputStream(file);
+
+         	oos.writeObject(infoDocHsh);
+         	oos.close();
+         	
+             /*File file = new File(pathForPostingFile + "\\Info On Docs Hash.txt");
+             FileWriter writer = new FileWriter(file);
+             writer.write(infoDocHsh.toString());
+             writer.close();*/
+         }catch (Exception e)
+         {
+             e.toString();
+         }
+
+     }
+
+
 
     private void writeInfoOnDoc()
     {
@@ -222,7 +235,7 @@ public class Manager {
         	parser= new Parser(pathForCorpus, stemming);
         }
        
-        searcher=new Searcher(parser,writeDictionary.loadDictionary(),WritePostingFile.AMOUNT_OF_POSTING_FILES,writeDictionary.pathToWrite());
+        searcher=new Searcher(parser,writeDictionary.loadDictionary(),writeDictionary.loadDictionaryInfo(),WritePostingFile.AMOUNT_OF_POSTING_FILES,writeDictionary.pathToWrite());
     }
     
     public void searchQuery(String query)

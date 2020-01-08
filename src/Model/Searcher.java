@@ -16,15 +16,17 @@ public class Searcher {
      * [term ; _ , _ , _ ]
      */
     HashMap<String, String> dictionary;
+    HashMap<String, String> dictionaryInfo;
 	Parser parser;
 	int amountOfPostingFiles;
 	String pathPostingFiles;
 	
 	//ctor- receives the same parser from the doc parsing 
-	public Searcher(Parser _parser,HashMap<String, String> _dictionary, int _amountOfPostingFiles,String _pathPostingFiles)
+	public Searcher(Parser _parser,HashMap<String, String> _dictionary,HashMap<String, String> _dictionaryInfo, int _amountOfPostingFiles,String _pathPostingFiles)
 	{
 		this.parser = _parser;
 		this.dictionary = _dictionary;
+		this.dictionaryInfo=_dictionaryInfo;
 		this.amountOfPostingFiles=_amountOfPostingFiles;
 		this.pathPostingFiles=_pathPostingFiles;
 	}

@@ -2,8 +2,11 @@ package Model;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.HashMap;
 
 public class WriteDictionary {
@@ -66,6 +69,34 @@ public class WriteDictionary {
         return dictionary;
     }
 
+    /**
+     * this function reads the dictionary info from the disk
+     *
+     * @return - HashMap dictionaryinfo
+     */
+    public HashMap<String, String> loadDictionaryInfo() {
+        HashMap<String, String> dictionaryInfo = new HashMap<>();
+        try
+        {
+           FileInputStream fis = new FileInputStream(this.pathToWrite +"\\Info On Docs Hash.txt" );
+           ObjectInputStream ois = new ObjectInputStream(fis);
+           dictionaryInfo = (HashMap) ois.readObject();
+           ois.close();
+           fis.close();
+        }catch(IOException ioe)
+        {
+           ioe.printStackTrace();
+           return null;
+        }catch(ClassNotFoundException c)
+        {
+           System.out.println("Class not found");
+           c.printStackTrace();
+           return null;
+        }
+        return dictionaryInfo;
+    }
+    
+    
     /**
      * Setters
      *
