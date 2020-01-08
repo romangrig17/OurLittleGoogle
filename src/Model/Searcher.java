@@ -33,18 +33,22 @@ public class Searcher {
 	
 	public void query(String query)
 	{
-		HashMap<String,Integer> words=parser.parseDoc(query, "0");
-		HashSet<String> allInfoPostingFile=new HashSet<String>();
-		for (Map.Entry word: words.entrySet())
+		HashMap<String,Integer> words=parser.parseDoc(query, "0");//word,count in query
+		HashMap<String,HashMap<String,Integer>> allInfoPostingFile=new HashMap<String,HashMap<String,Integer>>();//word to hash of <file, count>
+		String upperCase,lowerCase;
+		
+		for (Map.Entry<String,Integer> word: words.entrySet())
 		{
+			upperCase = word.getKey().toString().toUpperCase();
+			lowerCase = word.getKey().toString().toLowerCase();
 			System.out.println("searching for:" + word.getKey().toString());
-			if(this.dictionary.containsKey(word.getKey().toString().toLowerCase()))
+			if(this.dictionary.containsKey(lowerCase))
 			{
-				Integer termHashCode = (Math.abs((word.getKey().toString().toLowerCase()).hashCode() % this.amountOfPostingFiles));
+				Integer termHashCode = (Math.abs((lowerCase).hashCode() % this.amountOfPostingFiles));
 				File tempFile = new File(pathPostingFiles+"\\"+termHashCode.toString()+".txt");
 				if (tempFile.exists()) 
 	            {
-	            	HashSet<String> infoPostingFile = getTermFromPostingFile(word.getKey().toString().toLowerCase(), tempFile);//, termsByHashCode.get(termHashCode));
+					HashMap<String,Integer> infoPostingFile = getTermFromPostingFile(lowerCase, tempFile);//, termsByHashCode.get(termHashCode));
 	            	System.out.println("found in lower");
 	            	if (infoPostingFile == null)
 	                {
@@ -52,23 +56,18 @@ public class Searcher {
 	                }
 	                else
 	                {
-	                	/*for (String filepost: infoPostingFile)
-	                	{
-	                		String[] lineSplit = filepost.split("#");
-	                		System.out.println("found in :" + lineSplit[0] + " times: "+lineSplit[1]);
-	                	}*/
-	                	allInfoPostingFile.addAll(infoPostingFile);	
+	                	allInfoPostingFile.put(lowerCase,infoPostingFile);	
 	                }
 	            }
 			}
 			
-			if(this.dictionary.containsKey(word.getKey().toString().toUpperCase()))
+			if(this.dictionary.containsKey(upperCase))
 			{
-				Integer termHashCode = (Math.abs((word.getKey().toString().toLowerCase()).hashCode() % this.amountOfPostingFiles));
+				Integer termHashCode = (Math.abs((lowerCase).hashCode() % this.amountOfPostingFiles));
 				File tempFile = new File(pathPostingFiles+"\\"+termHashCode.toString()+".txt");
 				if (tempFile.exists()) 
 	            {
-	            	HashSet<String> infoPostingFile = getTermFromPostingFile(word.getKey().toString().toUpperCase(), tempFile);//, termsByHashCode.get(termHashCode));
+					HashMap<String,Integer> infoPostingFile = getTermFromPostingFile(upperCase, tempFile);//, termsByHashCode.get(termHashCode));
 	            	System.out.println("found in upper");
 	            	if (infoPostingFile == null)
 	                {
@@ -76,24 +75,20 @@ public class Searcher {
 	                }
 	                else
 	                {
-	                	/*for (String filepost: infoPostingFile)
-	                	{
-	                		String[] lineSplit = filepost.split("#");
-	                		//System.out.println("found in :" + lineSplit[0] + " times: "+lineSplit[1]);
-	                	}*/
-	                	allInfoPostingFile.addAll(infoPostingFile);	
+	                	allInfoPostingFile.put(upperCase,infoPostingFile);	
 	                }
 	            }
-				
 			}
 		}
+		
+		System.out.println("Done- allInfoPostingFile contains results. query is - query input");
 	}
 	
-	public HashSet<String> getTermFromPostingFile(String term, File file)
+	public HashMap<String,Integer> getTermFromPostingFile(String term, File file)
 	{
 		try 
 		{
-			HashSet<String> files=new HashSet<String>();;
+			HashMap<String,Integer> files=new HashMap<String,Integer>();
 	        BufferedReader br = new BufferedReader(new FileReader(file));
 	        String line;
 	        while ((line = br.readLine()) != null) {
@@ -103,8 +98,11 @@ public class Searcher {
 		            if (term.compareTo(lineSplit[0]) == 0)
 		            {
 		            	String[] docs = lineSplit[1].split(",");
-		            	for (String doc :docs)
-		            			files.add(doc);
+		            	for (String docsLine :docs)
+		            	{
+		            		String[] docsSplit = docsLine.split("#");
+		            		files.put(docsSplit[0],Integer.parseInt(docsSplit[1]));
+		            	}
 		            	 br.close();
 		            	return files;
 		            }
