@@ -1,5 +1,8 @@
 package Model;
 
+import Model.Term.*;
+import Model.Term.Number;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,16 +29,27 @@ public class WriteDictionary {
      *
      * @param dictionary - gets the dictionary we got
      */
-    public void run(HashMap<String, String> dictionary) {
+    public void run(HashMap<String, ITerm> dictionary) {
         StringBuilder dictionaryToWrite = new StringBuilder();
         for (String term : dictionary.keySet()) {
+            ITerm termPtr = dictionary.get(term);
             if(term.charAt(0) == '!')
             {
-                dictionaryToWrite.append(term.substring(1)).append(":").append(dictionary.get(term)).append("\n");
+                dictionaryToWrite.append(term.substring(1))
+                        .append(":").append(termPtr.getNumOfAppearanceInCorpus())
+                        .append(",").append(termPtr.getNumOfAppearanceInDocs())
+                        .append(",").append(termPtr.getLastDocument())
+                        .append(",").append(termPtr.getInstance())
+                        .append("\n");
             }
             else
             {
-                dictionaryToWrite.append(term).append(":").append(dictionary.get(term)).append("\n");
+                dictionaryToWrite.append(term)
+                        .append(":").append(termPtr.getNumOfAppearanceInCorpus())
+                        .append(",").append(termPtr.getNumOfAppearanceInDocs())
+                        .append(",").append(termPtr.getLastDocument())
+                        .append(",").append(termPtr.getInstance())
+                        .append("\n");
             }
         }
         try {
@@ -53,20 +67,43 @@ public class WriteDictionary {
      *
      * @return - dictionary
      */
-    public HashMap<String, String> loadDictionary() {
-        HashMap<String, String> dictionary = new HashMap<>();
+    public HashMap<String, ITerm> loadDictionary() {
+        HashMap<String, ITerm> dictionary = new HashMap<>();
         File file = new File((this.pathToWrite + "\\Dictionary.txt"));
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
             String line;
             while ((line = br.readLine()) != null) {
                 String[] splitLine = line.split(":");
-                dictionary.put(splitLine[0], splitLine[1]);
+                String[] splitInfo = splitLine[1].split(",");
+                addToDictionary(splitLine[0],Integer.parseInt(splitInfo[0]),Integer.parseInt(splitInfo[1]),splitInfo[2],splitInfo[3],dictionary);
             }
         } catch (Exception e) {
             e.toString();
         }
         return dictionary;
+    }
+
+    private void addToDictionary(String term, int numOfAppearanceInCorpus,int numOfAppearanceInDocs, String lastDoc, String instance , HashMap<String, ITerm> dictionary)
+    {
+        if (instance.equals("Entity"))
+        {
+            dictionary.put(term,new Entity(term,numOfAppearanceInCorpus,numOfAppearanceInDocs,lastDoc));
+        }
+        else if (instance.equals("Number"))
+        {
+            dictionary.put(term,new Number(term,numOfAppearanceInCorpus,numOfAppearanceInDocs,lastDoc));
+        }
+        //Expression
+        else if (instance.equals("Expression"))
+        {
+            dictionary.put(term,new Expression(term,numOfAppearanceInCorpus,numOfAppearanceInDocs,lastDoc));
+        }
+        //Term
+        else
+        {
+            dictionary.put(term,new Term(term,numOfAppearanceInCorpus,numOfAppearanceInDocs,lastDoc));
+        }
     }
     
     

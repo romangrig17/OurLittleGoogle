@@ -1,5 +1,7 @@
 package Model;
 
+import Model.Term.ITerm;
+
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.Semaphore;
@@ -267,7 +269,7 @@ public class WritePostingFile extends Thread {
      *
      * @param dictionary - dictionary
      */
-    public void writeTheEntity(HashMap<String, String> dictionary) {
+    public void writeTheEntity(HashMap<String, ITerm> dictionary) {
         if (h_Entity.size() < 1) {
             return;
         }
@@ -291,7 +293,7 @@ public class WritePostingFile extends Thread {
      * @param dictionary - the dictionary
      * @return - text that we need to write
      */
-    private StringBuilder getStringForEntityFile(HashMap<String, String> dictionary) {
+    private StringBuilder getStringForEntityFile(HashMap<String, ITerm> dictionary) {
         StringBuilder entityFile = new StringBuilder();
         //delete each entity that appears only one time
         for (String entity : h_Entity.keySet()) {

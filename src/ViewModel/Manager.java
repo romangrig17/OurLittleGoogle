@@ -2,13 +2,12 @@ package ViewModel;
 
 
 import Model.*;
+import Model.Term.*;
+import Model.Term.Number;
 import javafx.beans.binding.StringBinding;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.ObjectOutputStream;
 import java.util.*;
@@ -25,21 +24,22 @@ public class Manager {
     WritePostingFile writePostingFile;
     WriteDictionary writeDictionary;
     Parser parser;
-    
-    Searcher searcher;
+
+   // Searcher searcher;
 
     //variables
     String pathForPostingFile;
     String pathForCorpus;
     ArrayList<String> allFiles;
     String[][] sortedDictionary;
-    HashMap<String,Document> docsInfo;
+    StringBuilder docsInfo;
     int counterOfDocs = 0;
     boolean stemming;
 
+    HashMap<String,Integer> infoDocHsh = new HashMap<>();
     int line = 1;
 
-    private static final int AMOUNT_OF_DOCS_IN_POSTING_FILE = 25000;
+    private static final int AMOUNT_OF_DOCS_IN_POSTING_FILE = 20000;
 
     public Manager() {
         indexer = new Indexer();
@@ -47,7 +47,7 @@ public class Manager {
     }
 
     public void run() {
-        docsInfo = new HashMap<String,Document>();
+        docsInfo = new StringBuilder();
         fileReader = new ReadFile(pathForCorpus);
         allFiles = fileReader.getAllFiles();
         if (stemming) {
@@ -69,7 +69,7 @@ public class Manager {
             HashMap<String, StringBuilder> allTextsFromTheFile = fileReader.getTextsFromTheFile(new File(file));
             for (String docID : allTextsFromTheFile.keySet()) {
                 //parsing each doc
-                HashMap<String, Integer> listOfTerms = parser.parseDoc(allTextsFromTheFile.get(docID).toString(), docID);
+                HashMap<String, ITerm> listOfTerms = parser.parseDoc(allTextsFromTheFile.get(docID).toString(), docID);
 
                 //building temp posting file on ram
                 indexer.getPostingFileFromListOfTerms(listOfTerms, docID);
@@ -110,7 +110,8 @@ public class Manager {
         sortByTerms();
 
         System.out.println("The amount of unique terms: " + indexer.getDictionary().size());
-        writeInfoOnDocs();
+        writeInfoOnDoc();
+        writeInfoOnDocHash();
         //calculate the time for program
         long elapsedTime = System.currentTimeMillis() - start;
         double elapsedTimeD = (double) elapsedTime;
@@ -135,67 +136,73 @@ public class Manager {
 
     //<editor-fold des="Help Function For GUI>
 
-    //key = doc ID , lower and upper words ,  remove ! from entity
-    private void getInfoOnDoc(HashMap<String, Integer> listOfTerms, String docName) {
+    //key = doc ID , lower and upper words
+    private void getInfoOnDoc(HashMap<String, ITerm> listOfTerms, String docName) {
         if (listOfTerms != null && listOfTerms.size() > 2) {
             int counterAmount = 0;
-            for (Integer amount : listOfTerms.values()) {
-                counterAmount = counterAmount + amount;
+            Iterator it = listOfTerms.values().iterator();
+            while(it.hasNext())
+            {
+                counterAmount = counterAmount + ((ITerm)it.next()).getNumOfAppearanceInCorpus();
             }
-            String popularTerm = Collections.max(listOfTerms.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
-            Document doc=new Document(listOfTerms.size(),counterAmount,popularTerm,listOfTerms.get(popularTerm));
-            docsInfo.put(docName,doc);
+            infoDocHsh.put(docName,line);
+            docsInfo.append(docName).append(":Unique Terms: ").append(listOfTerms.size()).append(" ,Words: ").append(counterAmount).append(";");
+            Map.Entry<String, ITerm> maxEntry = null;
+
+            for (Map.Entry<String, ITerm> entry : listOfTerms.entrySet())
+            {
+                if (maxEntry == null || (entry.getValue().getNumOfAppearanceInDocs()) > (maxEntry.getValue().getNumOfAppearanceInDocs()))
+                {
+                    maxEntry = entry;
+                }
+            }
+            String popularTerm = maxEntry.getKey();
+            docsInfo.append(popularTerm).append("#").append(listOfTerms.get(popularTerm).getNumOfAppearanceInDocs()).append("\n");
+            line++;
+            //docsInfo.append("In Doc: ").append(docName).append(" was: ").append(listOfTerms.size()).append(" Terms");
+            //docsInfo.append(" ,And the length of document is:").append(counterAmount);
+            //String popularTerm = Collections.max(listOfTerms.entrySet(), Comparator.comparingInt(Map.Entry::getValue)).getKey();
+            //docsInfo.append(" And the most popular term is: ").append(popularTerm).append(" And he appeared: ").append(listOfTerms.get(popularTerm)).append(" times. \n");
         }
     }
 
-    private HashMap<String,Document> readInfoOnDocs()
+
+    private void writeInfoOnDocHash()
     {
-    	HashMap<String,Document> hashDoc=new HashMap<String,Document>();
-    	Document doc;
-    	
         try{
-        	BufferedReader reader = new BufferedReader(new FileReader(pathForPostingFile + "\\InfoOnDocs.txt"));
-    	 	String line;
-    	 	while((line = reader.readLine()) != null) {
-    	 		 String[] splitLine = line.split("#");
-    	 		doc=new Document(Integer.parseInt(splitLine[1]),Integer.parseInt(splitLine[2]),splitLine[3],Integer.parseInt(splitLine[4]));
-    	 		hashDoc.put(splitLine[0], doc);
-             }
-        	
-    	 	reader.close();
-    	 	
+
+            FileOutputStream file = new FileOutputStream(pathForPostingFile + "\\Info On Docs Hash.txt");
+            ObjectOutputStream oos = new ObjectOutputStream(file);
+
+            oos.writeObject(infoDocHsh);
+            oos.close();
+         	
+             /*File file = new File(pathForPostingFile + "\\Info On Docs Hash.txt");
+             FileWriter writer = new FileWriter(file);
+             writer.write(infoDocHsh.toString());
+             writer.close();*/
         }catch (Exception e)
         {
-            System.out.println(e.toString());
+            e.toString();
         }
-        return hashDoc;
 
     }
-    
 
-    private void writeInfoOnDocs()
-     {
-         try{
 
-        	 	BufferedWriter writer = new BufferedWriter(new FileWriter(pathForPostingFile + "\\InfoOnDocs.txt"));
-	         	Set set = docsInfo.entrySet();
-	            Iterator iterator = set.iterator();
-	            while(iterator.hasNext()) {
-	                Map.Entry entry = (Map.Entry)iterator.next();
-	                writer.write(entry.getKey()+"#");
-	                //System.out.println(entry.getKey());
-	                writer.write(docsInfo.get(entry.getKey()).toString());
-	               // System.out.println(docsInfo.get(entry.getKey()));
-	            }
-	            writer.close();
-             	
-         }catch (Exception e)
-         {
-             e.toString();
-         }
 
-     }
+    private void writeInfoOnDoc()
+    {
+        try{
+            File file = new File(pathForPostingFile + "\\Info On Docs.txt");
+            FileWriter writer = new FileWriter(file);
+            writer.write(docsInfo.toString());
+            writer.close();
+        }catch (Exception e)
+        {
+            e.toString();
+        }
 
+    }
 
     /**
      * return sorted dictionary: [0] - the term, [1] - the info on term
@@ -211,20 +218,20 @@ public class Manager {
      * This function is sorting the dictionary
      */
     public void sortByTerms() {
-        HashMap<String, String> dictionary = indexer.getDictionary();
+        HashMap<String, ITerm> dictionary = indexer.getDictionary();
         sortedDictionary = new String[indexer.getSizeOfDictionary()][2];
         // TreeMap to store values of HashMap
-        TreeMap<String, String> sorted = new TreeMap<>();
+        TreeMap<String, ITerm> sorted = new TreeMap<>();
 
         // Copy all data from hashMap into TreeMap
         sorted.putAll(dictionary);
 
         // Display the TreeMap which is naturally sorted
         int i = 0;
-        for (HashMap.Entry<String, String> entry : sorted.entrySet()) {
+        for (HashMap.Entry<String, ITerm> entry : sorted.entrySet()) {
 
             sortedDictionary[i][0] = entry.getKey();
-            sortedDictionary[i][1] = entry.getValue().split(",")[0];
+            sortedDictionary[i][1] = Integer.toString(entry.getValue().getNumOfAppearanceInCorpus());
             i++;
         }
     }
@@ -233,45 +240,44 @@ public class Manager {
      * This function is loading the dictionary to memory
      */
     public void loadDictionary(boolean stemming) {
-    	if(writeDictionary.pathToWrite() == null)
-    	{
-    		writeDictionary.setPathToWrite(pathForPostingFile, stemming, true);
-    	}
+        writeDictionary.setPathToWrite(pathForPostingFile, stemming, true);
         //indexer.setDictionary(writeDictionary.loadDictionary());
         if(parser==null)
         {
-        	System.out.println("pathForCorpus is: "+pathForCorpus);
-        	parser= new Parser(pathForCorpus, stemming);
+            System.out.println("pathForCorpus is: "+pathForCorpus);
+            parser= new Parser(pathForCorpus, stemming);
         }
-       
-        this.pathForPostingFile=writeDictionary.pathToWrite();
-        searcher=new Searcher(parser,writeDictionary.loadDictionary(),readInfoOnDocs(),WritePostingFile.AMOUNT_OF_POSTING_FILES,writeDictionary.pathToWrite());
-    }
-    
-    
-    public void searchQuery(String query)
-    {
-    	this.searcher.query(query);
+
+        //searcher=new Searcher(parser,writeDictionary.loadDictionary(),writeDictionary.loadDictionaryInfo(),WritePostingFile.AMOUNT_OF_POSTING_FILES,writeDictionary.pathToWrite());
     }
 
-    private HashMap<String, String> updateDictionary(HashMap<String, String> dictionary) {
-        HashMap<String, String> updatedDictionary = new HashMap<>();
+//    public void searchQuery(String query)
+//    {
+//        this.searcher.query(query);
+//    }
+
+    private HashMap<String, ITerm> updateDictionary(HashMap<String, ITerm> dictionary) {
+        HashMap<String, ITerm> updatedDictionary = new HashMap<>();
         Set<String> allTerms = dictionary.keySet();
         for (String term : allTerms) {
             if (term.charAt(0) >= 'A' && term.charAt(0) <= 'Z' && dictionary.containsKey(term.toLowerCase())) {
-                String[] splitLineOfUpper = dictionary.get(term).split(",");
-                String[] splitLineOfLowwer = dictionary.get(term).split(",");
-                int amountOfAppearance = Integer.parseInt(splitLineOfUpper[0]) + Integer.parseInt(splitLineOfLowwer[0]);
-                int numberOfDocs = Integer.parseInt(splitLineOfUpper[1]) + Integer.parseInt(splitLineOfLowwer[1]);
-                updatedDictionary.put(term.toLowerCase(), amountOfAppearance + "," + numberOfDocs + "," + splitLineOfLowwer[2]);
-            } else if(term.charAt(0) == '!'){
-                if(Integer.parseInt(dictionary.get(term).split(",")[0]) > 1)
-                {
-                    updatedDictionary.put(term.substring(1),dictionary.get(term));
+                ITerm tempPtrLow = dictionary.get(term.toLowerCase());
+                ITerm tempPtrUpper = dictionary.get(term.toUpperCase());
+                int amountOfAppearance = tempPtrUpper.getNumOfAppearanceInCorpus() + tempPtrLow.getNumOfAppearanceInCorpus();
+                int numberOfDocs = tempPtrUpper.getNumOfAppearanceInDocs() + tempPtrLow.getNumOfAppearanceInDocs();
+                String instance = tempPtrLow.getInstance();
+                 if (instance.equals("Number")) {
+                    updatedDictionary.put(term.toLowerCase(), new Number(term.toLowerCase(), amountOfAppearance, numberOfDocs, tempPtrLow.getLastDocument()));
                 }
-            }
-            else
-            {
+                //Expression
+                else if (instance.equals("Expression")) {
+                    updatedDictionary.put(term.toLowerCase(), new Expression(term.toLowerCase(), amountOfAppearance, numberOfDocs, tempPtrLow.getLastDocument()));
+                }
+                //Term
+                else {
+                    updatedDictionary.put(term.toLowerCase(), new Term(term.toLowerCase(), amountOfAppearance, numberOfDocs, tempPtrLow.getLastDocument()));
+                }
+            } else {
                 updatedDictionary.put(term, dictionary.get(term));
             }
         }

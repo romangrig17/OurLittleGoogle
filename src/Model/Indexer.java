@@ -2,6 +2,8 @@ package Model;
 
 import java.util.*;
 
+import Model.Term.*;
+import Model.Term.Number;
 import javafx.util.Pair;
 
 public class Indexer {
@@ -12,7 +14,7 @@ public class Indexer {
      * second string - "how many times appeared in the Corpus, in how many docs it was,the last doc where its appeared"
      * [term ; _ , _ , _ ]
      */
-    HashMap<String, String> dictionary;
+    HashMap<String, ITerm> dictionary;
 
     /**
      * first string - term
@@ -33,9 +35,9 @@ public class Indexer {
      * we will check first if the word is with small letters - and if it does we will change the dictionary and posting to small letters!
      * we will add this word - (with the small letters) to dictionary and check if it is the same document
      */
-    public HashMap<String, HashMap<String, Integer>> getPostingFileFromListOfTerms(HashMap<String, Integer> listOfTerms, String docName) {
+    public HashMap<String, HashMap<String, Integer>> getPostingFileFromListOfTerms(HashMap<String, ITerm> listOfTerms, String docName) {
     	boolean ifTheWordIsWithUpperLetters;
-    	String[] splitedDic;
+    	//String[] splitedDic;
     	String originalTermToUpper,originalTermToLower,originalTerm;
     	Pair<String,Boolean> updateOrig;
         for (String term : listOfTerms.keySet()) 
@@ -50,55 +52,58 @@ public class Indexer {
             Integer updateNumberOfDocuments,updateNumberOfTimesInAllCorpus;
             if (dictionary.containsKey(originalTermToLower))//dictionary contains term in lower case
             {
-                splitedDic = dictionary.get(originalTermToLower).split(",");
-                if (dictionary.get(originalTermToLower).split(",")[2].equals(docName))//dictionary contains term in lower case + the word is with upper case + prev doc containing is this doc
+                ITerm termPointer = dictionary.get(originalTermToLower);
+                if (dictionary.get(originalTermToLower).getLastDocument().equals(docName))//dictionary contains term in lower case + the word is with upper case + prev doc containing is this doc
                 {  //if its the same document
-                	addExistingWordToPostingExistingFile(originalTermToLower,listOfTerms.get(term),splitedDic[0],splitedDic[1],docName);
+                	addExistingWordToPostingExistingFile(originalTermToLower,listOfTerms.get(term).getNumOfAppearanceInCorpus(),termPointer.getNumOfAppearanceInCorpus(),termPointer.getNumOfAppearanceInDocs(),docName,termPointer.getInstance());
                 } 
                 else //new doc containing this term
                 {
-                	addExistingWordToPostingFileNewFile(originalTermToLower,listOfTerms.get(term),splitedDic[0],splitedDic[1],docName);
+                	addExistingWordToPostingFileNewFile(originalTermToLower,listOfTerms.get(term).getNumOfAppearanceInCorpus(),termPointer.getNumOfAppearanceInCorpus(),termPointer.getNumOfAppearanceInDocs(),docName,termPointer.getInstance());
                 }
             }
             else if (dictionary.containsKey(originalTermToUpper)) //dictionary contains term in upper case
             {
-                splitedDic = dictionary.get(originalTermToUpper).split(",");
+                ITerm termPointer = dictionary.get(originalTermToUpper);
                 if (ifTheWordIsWithUpperLetters) //we got term with upper case
                 {
-                    if (dictionary.get(originalTermToUpper).split(",")[2].equals(docName))//dictionary contains term in upper case + the word is with upper case 
+                    if (dictionary.get(originalTermToUpper).getLastDocument().equals(docName))//dictionary contains term in upper case + the word is with upper case
                     {  //if its the same document
-                    	addExistingWordToPostingExistingFile(originalTermToUpper,listOfTerms.get(term),splitedDic[0],splitedDic[1],docName);
+                    	addExistingWordToPostingExistingFile(originalTermToUpper,listOfTerms.get(term).getNumOfAppearanceInCorpus(),termPointer.getNumOfAppearanceInCorpus(),termPointer.getNumOfAppearanceInDocs(),docName,termPointer.getInstance());
                     } 
                     else //new doc containing this term
                     {
-                    	addExistingWordToPostingFileNewFile(originalTermToUpper,listOfTerms.get(term),splitedDic[0],splitedDic[1],docName);
+                    	addExistingWordToPostingFileNewFile(originalTermToUpper,listOfTerms.get(term).getNumOfAppearanceInCorpus(),termPointer.getNumOfAppearanceInCorpus(),termPointer.getNumOfAppearanceInDocs(),docName,termPointer.getInstance());
                     }
                 }
                 else  //we got term with lower letters
                 {
                 	if (postingFile.containsKey(originalTermToUpper))
                 	{
-                        updateNumberOfTimesInAllCorpus = Integer.parseInt(splitedDic[0]) + listOfTerms.get(term);
+                        updateNumberOfTimesInAllCorpus = termPointer.getNumOfAppearanceInCorpus() + listOfTerms.get(term).getNumOfAppearanceInCorpus();
                         HashMap infoDocs = postingFile.get(originalTermToUpper);
-                        if (dictionary.get(originalTermToUpper).split(",")[2].equals(docName))
+                        if (dictionary.get(originalTermToUpper).getLastDocument().equals(docName))
                         {
-                            dictionary.put(originalTermToLower, updateNumberOfTimesInAllCorpus + "," + splitedDic[1] + "," + docName);
+                            //dictionary.put(originalTermToLower)
+                            addToDictionaryByInstance(originalTermToLower,updateNumberOfTimesInAllCorpus,listOfTerms.get(term).getNumOfAppearanceInDocs(),docName,listOfTerms.get(term).getInstance());
+                            //dictionary.put(originalTermToLower, updateNumberOfTimesInAllCorpus + "," + splitedDic[1] + "," + docName);
                             int amountBefore = postingFile.get(originalTermToUpper).get(docName);
-                            int thisAmount = listOfTerms.get(term);
+                            int thisAmount = listOfTerms.get(term).getNumOfAppearanceInCorpus();
                             infoDocs.put(docName, amountBefore + thisAmount);
                             postingFile.put(originalTermToLower, infoDocs);
                         } 
                         else
                         {
-                            updateNumberOfDocuments = (Integer.parseInt(splitedDic[1])) + 1;
-                            dictionary.put(originalTermToLower, updateNumberOfTimesInAllCorpus + "," + updateNumberOfDocuments + "," + docName);
-                            infoDocs.put(docName, listOfTerms.get(term));
+                            //updateNumberOfDocuments = (Integer.parseInt(splitedDic[1])) + 1;
+                            //dictionary.put(originalTermToLower, updateNumberOfTimesInAllCorpus + "," + updateNumberOfDocuments + "," + docName);
+                            addToDictionaryByInstance(originalTermToLower,updateNumberOfTimesInAllCorpus,listOfTerms.get(term).getNumOfAppearanceInDocs() + 1,docName,listOfTerms.get(term).getInstance());
+                            infoDocs.put(docName, listOfTerms.get(term).getNumOfAppearanceInCorpus());
                             postingFile.put(originalTermToLower, infoDocs);
                         }
                 	}
                 	else
                 	{
-                		addToPostingFile(originalTermToLower, docName, listOfTerms.get(term));
+                		addToPostingFile(originalTermToLower, docName, listOfTerms.get(term).getNumOfAppearanceInCorpus());
                 	}       	
              
                     //if the term we got now with lower letters and we got with upper
@@ -109,13 +114,37 @@ public class Indexer {
             }
             else //if we see the term for the first time
             {
-                addToDictionary(originalTerm, listOfTerms.get(term), docName);
+                addToDictionary(originalTerm,listOfTerms.get(term).getNumOfAppearanceInCorpus(),docName, listOfTerms.get(term).getInstance());
+               // addToDictionaryByInstance(originalTerm, listOfTerms.get(term).getNumOfAppearanceInCorpus(),1 , docName, listOfTerms.get(term).getInstance());
             }
         }
 
         return postingFile;
     }
-    
+
+
+    private void addToDictionaryByInstance(String term, int numOfAppearanceInCorpus,int numOfAppearanceInDocs, String lastDoc, String instance)
+    {
+
+        if (instance.equals("Entity"))
+        {
+            dictionary.put(term,new Entity(term,numOfAppearanceInCorpus,numOfAppearanceInDocs,lastDoc));
+        }
+        else if (instance.equals("Number"))
+        {
+            dictionary.put(term,new Number(term,numOfAppearanceInCorpus,numOfAppearanceInDocs,lastDoc));
+        }
+        //Expression
+        else if (instance.equals("Expression"))
+        {
+            dictionary.put(term,new Expression(term,numOfAppearanceInCorpus,numOfAppearanceInDocs,lastDoc));
+        }
+        //Term
+        else
+        {
+            dictionary.put(term,new Term(term,numOfAppearanceInCorpus,numOfAppearanceInDocs,lastDoc));
+        }
+    }
 
     Pair<String,Boolean> updateOriginalTerm(String originalTerm)
     {
@@ -144,12 +173,13 @@ public class Indexer {
     	
     }
     
-    void addExistingWordToPostingFileNewFile(String termToAdd, Integer timesToAdd, String prevCountOfTimes, String prevCountOfDocs,String docName)
+    void addExistingWordToPostingFileNewFile(String termToAdd, int timesToAdd, int prevCountOfTimes, int prevCountOfDocs,String docName, String instance)
     {
         //if the word in dictionary was with upper/lower letters and we got with upper/lower letters too - new doc  
-        Integer updateNumberOfTimesInAllCorpus = Integer.parseInt(prevCountOfTimes) + timesToAdd;
-        Integer updateNumberOfDocuments = (Integer.parseInt(prevCountOfDocs)) + 1;//new file
-        dictionary.put(termToAdd, updateNumberOfTimesInAllCorpus + "," + updateNumberOfDocuments + "," + docName);
+        int updateNumberOfTimesInAllCorpus = prevCountOfTimes + timesToAdd;
+        int updateNumberOfDocuments = prevCountOfDocs + 1;//new file
+        addToDictionaryByInstance(termToAdd,updateNumberOfTimesInAllCorpus,updateNumberOfDocuments,docName,instance);
+        //dictionary.put(termToAdd, updateNumberOfTimesInAllCorpus + "," + updateNumberOfDocuments + "," + docName);
         if (postingFile.containsKey(termToAdd))
         {
             updatePostingFileIfNewFile(termToAdd, docName, timesToAdd);
@@ -160,12 +190,13 @@ public class Indexer {
         }
     }
     
-    void addExistingWordToPostingExistingFile(String termToAdd, Integer timesToAdd, String prevCountOfTimes, String prevCountOfDocs,String docName)
+    void addExistingWordToPostingExistingFile(String termToAdd, int timesToAdd, int prevCountOfTimes, int prevCountOfDocs,String docName, String instance)
     {
         //if the word in dictionary was with upper/lower letters and we got with upper/lower letters too - new doc apearence 
-        Integer updateNumberOfTimesInAllCorpus = Integer.parseInt(prevCountOfTimes) + timesToAdd;
-        Integer updateNumberOfDocuments = (Integer.parseInt(prevCountOfDocs));
-        dictionary.put(termToAdd, updateNumberOfTimesInAllCorpus + "," + updateNumberOfDocuments + "," + docName);
+        int updateNumberOfTimesInAllCorpus = prevCountOfTimes + timesToAdd;
+        int updateNumberOfDocuments = prevCountOfDocs;
+        addToDictionaryByInstance(termToAdd,updateNumberOfTimesInAllCorpus,updateNumberOfDocuments,docName,instance);
+        //dictionary.put(termToAdd, updateNumberOfTimesInAllCorpus + "," + updateNumberOfDocuments + "," + docName);
         if (postingFile.containsKey(termToAdd))
         {
             updatePostingFileIfNewFile(termToAdd, docName, timesToAdd);
@@ -187,9 +218,10 @@ public class Indexer {
      * @param howManyTimesAppearedInThisDoc - the number of times that word was in the text
      * @param docName                       - ID of document
      */
-    private void addToDictionary(String term, Integer howManyTimesAppearedInThisDoc, String docName) {
+    private void addToDictionary(String term, int howManyTimesAppearedInThisDoc, String docName, String instance) {
         // if the term is for the first time in the dictionary
-        dictionary.put(term, howManyTimesAppearedInThisDoc + ",1," + docName + ",");
+        addToDictionaryByInstance(term,howManyTimesAppearedInThisDoc,1,docName,instance);
+        //dictionary.put(term, howManyTimesAppearedInThisDoc + ",1," + docName + ",");
         addToPostingFile(term, docName, howManyTimesAppearedInThisDoc);
     }
 
@@ -252,7 +284,7 @@ public class Indexer {
     /**
      * @return - Dictionary
      */
-    public HashMap<String, String> getDictionary() {
+    public HashMap<String, ITerm> getDictionary() {
         return dictionary;
     }
 
@@ -279,8 +311,9 @@ public class Indexer {
     //</editor-fold>
 
     //<editor-fold des="Setters"
-    public void setDictionary(HashMap<String, String> dictionary) {
-        this.dictionary = dictionary;
+    public void setDictionary(HashMap<String, ITerm> dictionary) {
+        this.dictionary = new HashMap<>();
+        this.dictionary.putAll(dictionary);
     }
     //</editor-fold>
 }
