@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,22 +17,22 @@ public class Searcher {
      * [term ; _ , _ , _ ]
      */
     HashMap<String, String> dictionary;
-    HashMap<String, Document> docsInfo;
 	Parser parser;
 	int amountOfPostingFiles;
 	String pathPostingFiles;
+	Ranker ranker;
 	
 	//ctor- receives the same parser from the doc parsing 
 	public Searcher(Parser _parser,HashMap<String, String> _dictionary,HashMap<String, Document> _docsInfo, int _amountOfPostingFiles,String _pathPostingFiles)
 	{
 		this.parser = _parser;
 		this.dictionary = _dictionary;
-		this.docsInfo=_docsInfo;
 		this.amountOfPostingFiles=_amountOfPostingFiles;
 		this.pathPostingFiles=_pathPostingFiles;
+		this.ranker= new Ranker(_docsInfo);
 	}
 	
-	public void query(String query)
+	public  List<String> query(String query)
 	{
 		HashMap<String,Integer> words=parser.parseDoc(query, "0");//word,count in query
 		HashMap<String,HashMap<String,Integer>> allInfoPostingFile=new HashMap<String,HashMap<String,Integer>>();//word to hash of <file, count>
@@ -82,6 +83,8 @@ public class Searcher {
 		}
 		
 		System.out.println("Done- allInfoPostingFile contains results. query is - query input");
+		
+		return ranker.rank(words, allInfoPostingFile);
 	}
 	
 	public HashMap<String,Integer> getTermFromPostingFile(String term, File file)
