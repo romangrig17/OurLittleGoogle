@@ -37,6 +37,10 @@ public class Searcher {
 		HashMap<String,Integer> words=parser.parseDoc(query, "0");//word,count in query
 		HashMap<String,HashMap<String,Integer>> allInfoPostingFile=new HashMap<String,HashMap<String,Integer>>();//word to hash of <file, count>
 		String upperCase,lowerCase;
+		HashSet<String> allDocs = new HashSet<String>(); 
+		HashMap<String,Integer> docFrequency=new HashMap<String,Integer>();
+		
+		HashMap<String,Integer> wordsAsInDocs= new HashMap<String,Integer>();
 		
 		for (Map.Entry<String,Integer> word: words.entrySet())
 		{
@@ -49,7 +53,7 @@ public class Searcher {
 				File tempFile = new File(pathPostingFiles+"\\"+termHashCode.toString()+".txt");
 				if (tempFile.exists()) 
 	            {
-					HashMap<String,Integer> infoPostingFile = getTermFromPostingFile(lowerCase, tempFile);//, termsByHashCode.get(termHashCode));
+					HashMap<String,Integer> infoPostingFile = getTermFromPostingFile(lowerCase, tempFile,allDocs);//, termsByHashCode.get(termHashCode));
 	            	System.out.println("found in lower");
 	            	if (infoPostingFile == null)
 	                {
@@ -57,6 +61,9 @@ public class Searcher {
 	                }
 	                else
 	                {
+	                	String[] lineSplit = this.dictionary.get(lowerCase).split(",");
+	                	docFrequency.put(lowerCase,Integer.parseInt(lineSplit[1]) );//word with df
+	                	wordsAsInDocs.put(lowerCase, word.getValue());	
 	                	allInfoPostingFile.put(lowerCase,infoPostingFile);	
 	                }
 	            }
@@ -68,7 +75,7 @@ public class Searcher {
 				File tempFile = new File(pathPostingFiles+"\\"+termHashCode.toString()+".txt");
 				if (tempFile.exists()) 
 	            {
-					HashMap<String,Integer> infoPostingFile = getTermFromPostingFile(upperCase, tempFile);//, termsByHashCode.get(termHashCode));
+					HashMap<String,Integer> infoPostingFile = getTermFromPostingFile(upperCase, tempFile,allDocs);//, termsByHashCode.get(termHashCode));
 	            	System.out.println("found in upper");
 	            	if (infoPostingFile == null)
 	                {
@@ -76,6 +83,9 @@ public class Searcher {
 	                }
 	                else
 	                {
+	                   	String[] lineSplit = this.dictionary.get(upperCase).split(",");
+	                	docFrequency.put(upperCase,Integer.parseInt(lineSplit[1]) );//word with df
+	                	wordsAsInDocs.put(upperCase, word.getValue());	
 	                	allInfoPostingFile.put(upperCase,infoPostingFile);	
 	                }
 	            }
@@ -84,10 +94,10 @@ public class Searcher {
 		
 		System.out.println("Done- allInfoPostingFile contains results. query is - query input");
 		
-		return ranker.rank(words, allInfoPostingFile);
+		return ranker.rank(wordsAsInDocs, allInfoPostingFile,allDocs,docFrequency);
 	}
 	
-	public HashMap<String,Integer> getTermFromPostingFile(String term, File file)
+	public HashMap<String,Integer> getTermFromPostingFile(String term, File file, HashSet<String> allDocs)
 	{
 		try 
 		{
@@ -105,6 +115,7 @@ public class Searcher {
 		            	{
 		            		String[] docsSplit = docsLine.split("#");
 		            		files.put(docsSplit[0],Integer.parseInt(docsSplit[1]));
+		            		allDocs.add(docsSplit[0]);
 		            	}
 		            	 br.close();
 		            	return files;
