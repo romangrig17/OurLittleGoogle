@@ -52,7 +52,6 @@ public class Ranker {
 					
 					//word.getValue();//c(w,q)-count word int query
 					docCalc+=word.getValue() * (((this.k+1)*countWordInDoc)/(countWordInDoc+this.k)) * Math.log((this.M+1)/docFrequency.get(word.getKey()));
-					
 				}
 			}
 			
